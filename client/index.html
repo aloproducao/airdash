@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="manifest" href="./manifest.json" />
+    <title>AirDash</title>
+  </head>
+  <body>
+    <h1>AirDash</h1>
+
+    <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
+    <script>
+      ;(async function() {
+        if ('serviceWorker' in navigator) {
+          await navigator.serviceWorker.register('./sw.js')
+          console.log('Service worker registered')
+        } else {
+          console.error('No service worker support')
+        }
+      })()
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const parsedUrl = new URL(window.location)
+        console.log('Title shared: ' + parsedUrl.searchParams.get('title'))
+        console.log('Text shared: ' + parsedUrl.searchParams.get('text'))
+        console.log('URL shared: ' + parsedUrl.searchParams.get('url'))
+      })
+
+      const peer = new peerjs.Peer()
+      const conn = peer.connect('someatoms-online4')
+      conn.on('open', function() {
+        conn.send('hi!')
+        console.log('Sent message hi')
+      })
+      conn.on('error', function(err) {
+        console.log('err', err)
+      })
+      console.log('Started...')
+    </script>
+  </body>
+</html>

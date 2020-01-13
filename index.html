@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AirDash</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+</head>
+<body>
+<h1>AirDash</h1>
+<p>Easiest file transfer from Android to Computer</p>
+
+<script src="./node_modules/peerjs/dist/peerjs.js"></script>
+<script>
+    const peer = new peerjs.Peer('someatoms-online4');
+    peer.on('connection', function(conn) {
+        conn.on('data', function(data){
+            console.log(data);
+            storeData(data);
+        });
+    });
+    console.log('Started receiver...');
+
+    function storeData(data) {
+        const fs = require('fs');
+        const path = require('path');
+        const os = require('os');
+
+        const desktopPath = path.join(os.homedir(), 'Desktop');
+        const filepath = path.join(desktopPath, 'message.txt');
+        fs.writeFileSync(filepath, data);
+    }
+</script>
+</body>
+</html>

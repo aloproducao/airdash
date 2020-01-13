@@ -1,0 +1,21 @@
+{
+  "private": true,
+  "main": "main.js",
+  "dependencies": {
+    "peerjs": "^1.2.0"
+  },
+  "devDependencies": {
+    "electron": "^7.1.9",
+    "live-server": "^1.2.1",
+    "prettier": "^1.19.1"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "semi": false,
+    "singleQuote": true
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
