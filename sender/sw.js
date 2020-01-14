@@ -17,6 +17,6 @@ self.addEventListener('fetch', event => {
 
     console.log(`Message "${file.name}" stored`)
 
-    return Response.redirect('/')
+    return Response.redirect('./')
   })())
 })
