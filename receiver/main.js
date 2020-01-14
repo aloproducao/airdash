@@ -11,7 +11,7 @@ function createWindow() {
     },
   })
 
-  win.loadFile('index.html')
+  win.loadFile(__dirname + '/index.html')
   win.webContents.openDevTools()
 
   // Emitted when the window is closed.

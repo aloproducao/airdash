@@ -9,16 +9,15 @@
 <h1>AirDash</h1>
 <p>Easiest file transfer from Android to Computer</p>
 
-<script src="./node_modules/peerjs/dist/peerjs.js"></script>
+<script src="../node_modules/peerjs/dist/peerjs.js"></script>
 <script>
     const peer = new peerjs.Peer('simonbengtsson-airdash');
     peer.on('connection', function(conn) {
         conn.on('data', function(message){
-            console.log(message);
-            storeMessage(message);
+          console.log(message);
+          storeMessage(message);
         });
     });
-    console.log('Started receiver...');
 
     function storeMessage(message) {
         const fs = require('fs');

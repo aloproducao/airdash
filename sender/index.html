@@ -7,6 +7,7 @@
   </head>
   <body>
     <h1>AirDash</h1>
+    <p>Share a message to this page using the Android Share menu</p>
 
     <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
     <script>
@@ -16,23 +17,25 @@
         }
       })()
 
-      window.addEventListener('DOMContentLoaded', () => {
-        const parsedUrl = new URL(window.location)
-        console.log('Title shared: ' + parsedUrl.searchParams.get('title'))
-        console.log('Text shared: ' + parsedUrl.searchParams.get('text'))
-        console.log('URL shared: ' + parsedUrl.searchParams.get('url'))
-      })
-
       const peer = new peerjs.Peer()
       const conn = peer.connect('simonbengtsson-airdash')
       conn.on('open', function() {
-        conn.send('hi!')
-        console.log('Sent message hi')
+        const parsedUrl = new URL(window.location)
+        const title = parsedUrl.searchParams.get('title') || ''
+        const text = parsedUrl.searchParams.get('text') || ''
+        const url = parsedUrl.searchParams.get('url') || ''
+        let message;
+        if (title || text || url) {
+          message = `${title}\n${text}\n${url}`.trim()
+        } else {
+          message = 'No Message'
+        }
+        conn.send(message)
+        console.log('Sent message: ', message)
       })
       conn.on('error', function(err) {
         console.log('err', err)
       })
-      console.log('Started...')
     </script>
   </body>
 </html>

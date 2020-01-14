@@ -1,6 +1,6 @@
 {
   "private": true,
-  "main": "main.js",
+  "main": "./receiver/main.js",
   "dependencies": {
     "peerjs": "^1.2.0"
   },
