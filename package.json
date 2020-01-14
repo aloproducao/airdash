@@ -1,11 +1,13 @@
 {
   "private": true,
+  "productName": "AirDash",
   "main": "./receiver/main.js",
   "dependencies": {
     "peerjs": "^1.2.0"
   },
   "devDependencies": {
     "electron": "^7.1.9",
+    "electron-packager": "^14.2.0",
     "live-server": "^1.2.1",
     "prettier": "^1.19.1"
   },
@@ -16,6 +18,8 @@
   },
   "scripts": {
     "start": "electron .",
+    "build-receiver": "npx electron-packager . ",
+    "deploy-sender": "rsync -a -e 'ssh -p 3333' sender/ simonb@flown.io:/var/www/simonbengtsson/airdash --stats --progress",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 }
