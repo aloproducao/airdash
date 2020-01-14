@@ -3,11 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="manifest" href="./manifest.json" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title>AirDash</title>
   </head>
   <body>
     <h1>AirDash</h1>
-    <p>Share a message to this page using the Android Share menu</p>
+    <p>Share a text message to this app from the Android Share menu or as the text query param and it will be stored in ~/Desktop/message.txt on the connected computer</p>
+
+    <h3>Current Message</h3>
+    <pre id="message">Loading...</pre>
 
     <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
     <script>
@@ -31,6 +36,7 @@
           message = 'No Message'
         }
         conn.send(message)
+        document.querySelector('#message').textContent = message
         console.log('Sent message: ', message)
       })
       conn.on('error', function(err) {
