@@ -3,13 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./logo.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>AirDash</title>
   </head>
   <body>
     <h1>AirDash</h1>
-    <p>Share a text message to this app from the Android Share menu or as the text query param and it will be stored in ~/Desktop/message.txt on the connected computer</p>
+    <p>Easiest file transfer from Android to Computer</p>
+
+    <label for="file">File to send</label>
+    <input id="file" type="file">
+
+    <p>You can also share a file to this app from the Android share menu.</p>
+
+    <p>The file will be sent to the the connected computer</p>
 
     <h3>Current Message</h3>
     <pre id="message">Loading...</pre>
