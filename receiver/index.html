@@ -3,31 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <title>AirDash</title>
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';"/>
 </head>
 <body>
 <h1>AirDash</h1>
 <p>Easiest file transfer from Android to Computer</p>
+<p>Listening for files...</p>
 
 <script src="../node_modules/peerjs/dist/peerjs.js"></script>
 <script>
-    const peer = new peerjs.Peer('simonbengtsson-airdash');
-    peer.on('connection', function(conn) {
-        conn.on('data', function(message){
-          console.log(message);
-          storeMessage(message);
-        });
-    });
+  const fs = require('fs')
+  const peer = new peerjs.Peer('simonbengtsson-airdash')
+  peer.on('connection', function(conn) {
+    conn.on('data', function(message) {
+      console.log(message)
+      storeMessage(message)
+    })
+  })
+  fs.unlinkSync(messageFilePath())
 
-    function storeMessage(message) {
-        const fs = require('fs');
-        const path = require('path');
-        const os = require('os');
+  function messageFilePath() {
+    const path = require('path')
+    const os = require('os')
 
-        const desktopPath = path.join(os.homedir(), 'Desktop');
-        const filepath = path.join(desktopPath, 'message.txt');
-        fs.writeFileSync(filepath, message);
-    }
+    const desktopPath = path.join(os.homedir(), 'Desktop')
+    return path.join(desktopPath, 'message.txt')
+  }
+
+  function storeMessage(message) {
+    fs.writeFileSync(messageFilePath(), message)
+  }
 </script>
 </body>
 </html>
