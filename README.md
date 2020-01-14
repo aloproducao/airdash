@@ -6,11 +6,11 @@ Easiest file transfer from Android to Computer
 
 With the help of WebRTC through PeerJS the aim is to make it one click to share a file from an Android device to a computer.
 
-### Deploy pwa
+### Deploy sender
 
-`rsync -a -e 'ssh -p 3333' client/ simonb@flown.io:/var/www/simonbengtsson/airdash --stats --progress`
+`rsync -a -e 'ssh -p 3333' sender/ simonb@flown.io:/var/www/simonbengtsson/airdash --stats --progress`
 
-### Deploy desktop
+### Deploy receiver
 
 Todo
 
