@@ -9,9 +9,13 @@ self.addEventListener('fetch', event => {
   event.respondWith((async () => {
     const formData = await event.request.formData()
     const message = formData.get('text') || 'none'
+    const file = formData.get('file') || 'none'
+    formData.append('filename', file.name)
 
-    await localforage.setItem('message', message)
-    console.log(`Message "${message}" stored`)
+    await localforage.setItem('file', file)
+    await localforage.setItem('filename', file.name)
+
+    console.log(`Message "${file.name}" stored`)
 
     return Response.redirect('/')
   })())

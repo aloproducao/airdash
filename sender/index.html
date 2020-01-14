@@ -12,15 +12,10 @@
     <h1>AirDash</h1>
     <p>Easiest file transfer from Android to Computer</p>
 
-    <form action="/" method="POST">
-      <label>Text <input id="test" name="text" ></label>
+    <form action="/" method="POST" enctype="multipart/form-data">
       <label>File <input name="file" type="file"></label>
-
       <input type="submit">
     </form>
-
-
-
 
     <p>You can also share a file to this app from the Android share menu.</p>
 
@@ -41,14 +36,15 @@
           }
         }
 
-        const message = await localforage.getItem('message')
+        const file = await localforage.getItem('file')
+        const filename = await localforage.getItem('filename')
 
         const peer = new peerjs.Peer()
-        const conn = peer.connect('simonbengtsson-airdash')
+        const conn = peer.connect('simonbengtsson-airdash', {metadata: { filename }})
         conn.on('open', function() {
-          conn.send(message)
-          document.querySelector('#message').textContent = message
-          console.log('Sent message: ', message)
+          conn.send(file)
+          document.querySelector('#message').textContent = filename
+          console.log('File sent', filename, file)
         })
         conn.on('error', function(err) {
           console.log('err', err)

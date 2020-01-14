@@ -15,23 +15,20 @@
   const fs = require('fs')
   const peer = new peerjs.Peer('simonbengtsson-airdash')
   peer.on('connection', function(conn) {
-    conn.on('data', function(message) {
-      console.log(message)
-      storeMessage(message)
+    conn.on('data', function(file) {
+      const filename = (conn.metadata && conn.metadata.filename) || 'unknown'
+      const path = messageFilePath(filename)
+      console.log('storing', path)
+      fs.writeFileSync(path, new Buffer(file))
     })
   })
-  fs.unlinkSync(messageFilePath())
 
-  function messageFilePath() {
+  function messageFilePath(filename) {
     const path = require('path')
     const os = require('os')
 
     const desktopPath = path.join(os.homedir(), 'Desktop')
-    return path.join(desktopPath, 'message.txt')
-  }
-
-  function storeMessage(message) {
-    fs.writeFileSync(messageFilePath(), message)
+    return path.join(desktopPath, filename)
   }
 </script>
 </body>
