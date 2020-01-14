@@ -1,6 +1,7 @@
 {
-  "name": "Easiest file transfer from Android to Computer",
+  "name": "AirDash",
   "short_name": "AirDash",
+  "description": "Easiest file transfer from Android to Computer",
   "start_url": "./index.html",
   "display": "standalone",
   "theme_color": "#ffffff",
