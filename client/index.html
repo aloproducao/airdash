@@ -13,9 +13,6 @@
       ;(async function() {
         if ('serviceWorker' in navigator) {
           await navigator.serviceWorker.register('./sw.js')
-          console.log('Service worker registered')
-        } else {
-          console.error('No service worker support')
         }
       })()
 
@@ -27,7 +24,7 @@
       })
 
       const peer = new peerjs.Peer()
-      const conn = peer.connect('someatoms-online4')
+      const conn = peer.connect('simonbengtsson-airdash')
       conn.on('open', function() {
         conn.send('hi!')
         console.log('Sent message hi')

@@ -11,23 +11,23 @@
 
 <script src="./node_modules/peerjs/dist/peerjs.js"></script>
 <script>
-    const peer = new peerjs.Peer('someatoms-online4');
+    const peer = new peerjs.Peer('simonbengtsson-airdash');
     peer.on('connection', function(conn) {
-        conn.on('data', function(data){
-            console.log(data);
-            storeData(data);
+        conn.on('data', function(message){
+            console.log(message);
+            storeMessage(message);
         });
     });
     console.log('Started receiver...');
 
-    function storeData(data) {
+    function storeMessage(message) {
         const fs = require('fs');
         const path = require('path');
         const os = require('os');
 
         const desktopPath = path.join(os.homedir(), 'Desktop');
         const filepath = path.join(desktopPath, 'message.txt');
-        fs.writeFileSync(filepath, data);
+        fs.writeFileSync(filepath, message);
     }
 </script>
 </body>
