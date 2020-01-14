@@ -12,8 +12,15 @@
     <h1>AirDash</h1>
     <p>Easiest file transfer from Android to Computer</p>
 
-    <label for="file">File to send</label>
-    <input id="file" type="file">
+    <form action="/" method="POST">
+      <label>Text <input id="test" name="text" ></label>
+      <label>File <input name="file" type="file"></label>
+
+      <input type="submit">
+    </form>
+
+
+
 
     <p>You can also share a file to this app from the Android share menu.</p>
 
@@ -22,34 +29,31 @@
     <h3>Current Message</h3>
     <pre id="message">Loading...</pre>
 
+    <script src="https://unpkg.com/localforage@1.7.3/dist/localforage.js"></script>
     <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
     <script>
       ;(async function() {
         if ('serviceWorker' in navigator) {
-          await navigator.serviceWorker.register('./sw.js')
+          try {
+            await navigator.serviceWorker.register('./sw.js')
+          } catch(err) {
+            console.log('sw failed', err)
+          }
         }
-      })()
 
-      const peer = new peerjs.Peer()
-      const conn = peer.connect('simonbengtsson-airdash')
-      conn.on('open', function() {
-        const parsedUrl = new URL(window.location)
-        const title = parsedUrl.searchParams.get('title') || ''
-        const text = parsedUrl.searchParams.get('text') || ''
-        const url = parsedUrl.searchParams.get('url') || ''
-        let message;
-        if (title || text || url) {
-          message = `${title}\n${text}\n${url}`.trim()
-        } else {
-          message = 'No Message'
-        }
-        conn.send(message)
-        document.querySelector('#message').textContent = message
-        console.log('Sent message: ', message)
-      })
-      conn.on('error', function(err) {
-        console.log('err', err)
-      })
+        const message = await localforage.getItem('message')
+
+        const peer = new peerjs.Peer()
+        const conn = peer.connect('simonbengtsson-airdash')
+        conn.on('open', function() {
+          conn.send(message)
+          document.querySelector('#message').textContent = message
+          console.log('Sent message: ', message)
+        })
+        conn.on('error', function(err) {
+          console.log('err', err)
+        })
+      })()
     </script>
   </body>
 </html>

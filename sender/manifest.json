@@ -7,13 +7,23 @@
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
   "share_target": {
-    "enctype": "application/x-www-form-urlencoded",
-    "method": "GET",
+    "enctype": "multipart/form-data",
+    "method": "POST",
     "action": "./index.html",
     "params": {
       "title": "title",
       "text": "text",
-      "url": "url"
+      "url": "url",
+      "files": [
+        {
+          "name": "records",
+          "accept": ["text/csv", ".csv"]
+        },
+        {
+          "name": "graphs",
+          "accept": "image/svg+xml"
+        }
+      ]
     }
   },
   "icons": [
