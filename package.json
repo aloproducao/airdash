@@ -18,6 +18,7 @@
   },
   "scripts": {
     "start": "electron .",
+    "start-sender": "live-server ./sender",
     "build-receiver": "npx electron-packager . --overwrite",
     "deploy-sender": "rsync -a -e 'ssh -p 3333' sender/ simonb@flown.io:/var/www/simonbengtsson/airdash --stats --progress",
     "test": "echo \"Error: no test specified\" && exit 1"
