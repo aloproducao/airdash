@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';"/>
 </head>
 <body>
-<h1>AirDash</h1>
+<h1 id="name">AirDash</h1>
 
 <button id="select-location">Choose Folder</button>
 <span id="location"></span>
@@ -17,6 +17,10 @@
 
 <script src="../node_modules/peerjs/dist/peerjs.js"></script>
 <script>
+  if (require('electron-is-dev')) {
+    document.querySelector('#name').textContent = 'AirDash Local'
+  }
+
   document.querySelector('#location').textContent = locationFolder();
 
   document.querySelector('#select-location').onclick = async () => {

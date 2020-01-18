@@ -1,4 +1,5 @@
 const { menubar } = require('menubar');
+const isDev = require('electron-is-dev')
 
 const mb = menubar({
   index: 'file://' + __dirname + '/index.html',
@@ -14,5 +15,7 @@ const mb = menubar({
 });
 
 mb.on('ready', () => {
-  console.log('app is ready');
+  console.log('App is ready', process.argv);
+
+  if (isDev) mb.window.openDevTools()
 });
