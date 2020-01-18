@@ -13,7 +13,9 @@
 
 <br><br>
 
-<label>Connection ID <input id="connection-id" value="simon"></label>
+<label>Connection ID <input id="connection-id" value=""></label>
+<button id="select-connection-id">Set</button>
+<span id="connection-id-field"></span>
 
 <script src="../node_modules/peerjs/dist/peerjs.js"></script>
 <script>
@@ -22,6 +24,17 @@
   }
 
   document.querySelector('#location').textContent = locationFolder();
+  document.querySelector('#connection-id-field').textContent = getConnectionId();
+
+  document.querySelector('#select-connection-id').onclick = async () => {
+    const idElem = document.querySelector('#connection-id')
+    if (idElem.value.length > 2) {
+      localStorage.setItem('connection-id', idElem.value)
+      document.querySelector('#connection-id-field').textContent = idElem.value
+    }
+    idElem.value = ''
+    reconnect()
+  }
 
   document.querySelector('#select-location').onclick = async () => {
     const { dialog } = require('electron').remote;
@@ -35,25 +48,35 @@
     }
   }
 
-  const connectionUserId = document.querySelector('#connection-id').value
-  const connectionId = `flownio-airdash-${connectionUserId}`
-  const peer = new peerjs.Peer(connectionId)
-  peer.on('connection', (conn) => {
-    conn.on('data', (file) => {
-      const path = require('path')
-      const fs = require('fs')
+  let previousPeer = null;
+  reconnect()
+  function reconnect() {
+    if (previousPeer) previousPeer.destroy()
+    const connectionId = `flownio-airdash-${getConnectionId()}`
+    const peer = new peerjs.Peer(connectionId)
+    console.log(`Started listening with ${connectionId}...`)
+    peer.on('connection', (conn) => {
+      conn.on('data', (file) => {
+        const path = require('path')
+        const fs = require('fs')
 
-      const filename = conn.metadata.filename || 'unknown'
-      const filepath = path.join(locationFolder(), filename)
-      fs.writeFileSync(filepath, new Buffer(file))
+        const filename = conn.metadata.filename || 'unknown'
+        const filepath = path.join(locationFolder(), filename)
+        fs.writeFileSync(filepath, new Buffer(file))
+      })
     })
-  })
+    previousPeer = peer
+  }
 
   function locationFolder() {
     const path = require('path')
     const os = require('os')
     const desktopPath = path.join(os.homedir(), 'Desktop')
     return localStorage.getItem('location') || desktopPath
+  }
+
+  function getConnectionId() {
+    return localStorage.getItem('connection-id') || 'simon'
   }
 </script>
 </body>
