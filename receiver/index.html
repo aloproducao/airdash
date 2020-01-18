@@ -54,7 +54,7 @@
     if (previousPeer) previousPeer.destroy()
     const connectionId = `flownio-airdash-${getConnectionId()}`
     const peer = new peerjs.Peer(connectionId)
-    console.log(`Started listening with ${connectionId}...`)
+    console.log(`Listening on ${connectionId}...`)
     peer.on('connection', (conn) => {
       conn.on('data', (file) => {
         const path = require('path')
@@ -64,6 +64,7 @@
         const filepath = path.join(locationFolder(), filename)
         fs.writeFileSync(filepath, new Buffer(file))
         conn.send('done')
+        console.log('Received ' + filepath)
       })
     })
     previousPeer = peer
