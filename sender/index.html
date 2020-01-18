@@ -40,7 +40,7 @@
 
         if (file && filename) {
           const peer = new peerjs.Peer()
-          const conn = peer.connect('simonbengtsson-airdash', {metadata: { filename }})
+          const conn = peer.connect('flownio-airdash-simon', {metadata: { filename }})
           conn.on('open', function() {
             conn.send(file)
             document.querySelector('#message').textContent = filename

@@ -15,7 +15,7 @@ const mb = menubar({
 });
 
 mb.on('ready', () => {
-  console.log('App is ready', process.argv);
+  console.log('App is ready');
 
   if (isDev) mb.window.openDevTools()
 });

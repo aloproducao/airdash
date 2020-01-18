@@ -13,7 +13,7 @@
 
 <br><br>
 
-<label>Connection ID <input id="connection-id" value="simonbengtsson-airdash"></label>
+<label>Connection ID <input id="connection-id" value="simon"></label>
 
 <script src="../node_modules/peerjs/dist/peerjs.js"></script>
 <script>
@@ -35,7 +35,8 @@
     }
   }
 
-  const connectionId = document.querySelector('#connection-id').value
+  const connectionUserId = document.querySelector('#connection-id').value
+  const connectionId = `flownio-airdash-${connectionUserId}`
   const peer = new peerjs.Peer(connectionId)
   peer.on('connection', (conn) => {
     conn.on('data', (file) => {
