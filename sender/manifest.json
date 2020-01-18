@@ -15,14 +15,7 @@
       "text": "text",
       "url": "url",
       "files": [
-        {"name": "file", "accept": ["text/html", ".html"]},
-        {"name": "file", "accept": ["text/html", ".htm"]},
-        {"name": "file", "accept": ["text/plain", ".txt"]},
-        {"name": "file", "accept": ["application/pdf", ".pdf"]},
-        {"name": "imaging", "accept": ["image/png", ".png"]},
-        {"name": "imaging", "accept": ["image/jpeg", ".jpg"]},
-        {"name": "imaging", "accept": ["image/jpeg", ".jpeg"]},
-        {"name": "file", "accept": ["text/csv", ".csv"]}
+        {"name": "file", "accept": ["*/*"]}
       ]
     }
   },
