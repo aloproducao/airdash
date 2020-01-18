@@ -2,6 +2,7 @@ const { menubar } = require('menubar');
 
 const mb = menubar({
   index: 'file://' + __dirname + '/index.html',
+  icon: __dirname + '/icon.png',
   preloadWindow: true,
   browserWindow: {
     webPreferences: {
