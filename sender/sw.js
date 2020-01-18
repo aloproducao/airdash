@@ -8,14 +8,29 @@ self.addEventListener('fetch', event => {
 
   event.respondWith((async () => {
     const formData = await event.request.formData()
-    const message = formData.get('text') || 'none'
-    const file = formData.get('file') || 'none'
-    formData.append('filename', file.name)
 
-    await localforage.setItem('file', file)
-    await localforage.setItem('filename', file.name)
+    await localforage.clear()
 
-    console.log(`Message "${file.name}" stored`)
+    if (!formData.get('form')) {
+      let file = formData.get('file') || ''
+      if (!file) {
+        file = formData.get('imaging')
+        if (file) {
+          console.log('IMAGING NAME CONFIRMED', file)
+        }
+      } else {
+        console.log('Name was still "file"')
+      }
+      await localforage.setItem('file', file)
+      await localforage.setItem('filename', file.name)
+    } else {
+      const file = formData.get('formfile') || 'none'
+
+      await localforage.setItem('file', file)
+      await localforage.setItem('filename', file.name)
+
+      console.log(`File "${file.name}" stored`)
+    }
 
     return Response.redirect('./')
   })())

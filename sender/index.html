@@ -9,11 +9,12 @@
     <title>AirDash</title>
   </head>
   <body>
-    <h1>AirDash</h1>
-    <p>Easiest file transfer from Android to Computer</p>
+    <h1>AirDash Local</h1>
+    <p>One click file transfer from Android to Computer</p>
 
     <form action="./" method="POST" enctype="multipart/form-data">
-      <label>File <input name="file" type="file"></label>
+      <input name="form" type="text" value="true">
+      <label>File <input name="formfile" type="file"></label>
       <input type="submit">
     </form>
 
@@ -28,27 +29,32 @@
     <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
     <script>
       ;(async function() {
-        if ('serviceWorker' in navigator) {
-          try {
-            await navigator.serviceWorker.register('./sw.js')
-          } catch(err) {
-            console.log('sw failed', err)
-          }
+        try {
+          await navigator.serviceWorker.register('./sw.js')
+        } catch(err) {
+          console.log('sw failed', err)
         }
 
         const file = await localforage.getItem('file')
         const filename = await localforage.getItem('filename')
 
-        const peer = new peerjs.Peer()
-        const conn = peer.connect('simonbengtsson-airdash', {metadata: { filename }})
-        conn.on('open', function() {
-          conn.send(file)
-          document.querySelector('#message').textContent = filename
-          console.log('File sent', filename, file)
-        })
-        conn.on('error', function(err) {
-          console.log('err', err)
-        })
+        if (file && filename) {
+          const peer = new peerjs.Peer()
+          const conn = peer.connect('simonbengtsson-airdash', {metadata: { filename }})
+          conn.on('open', function() {
+            conn.send(file)
+            document.querySelector('#message').textContent = filename
+            console.log('File sent 2', filename, file)
+          })
+          conn.on('error', function(err) {
+            console.log('err', err)
+          })
+        } else {
+          console.log('File was not stored')
+          await localforage.iterate(function(value, key) {
+            console.log('STORED', key, value);
+          })
+        }
       })()
     </script>
   </body>
