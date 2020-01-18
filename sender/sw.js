@@ -1,8 +1,25 @@
 self.importScripts('https://unpkg.com/localforage@1.7.3/dist/localforage.js')
 
 self.addEventListener('fetch', event => {
+
+  async function responseWithAppName(appName, event) {
+    const res = await fetch(event.request)
+    if (!res.url.includes('manifest.json')) {
+      return res
+    }
+    const json = await res.json()
+    json.name = appName
+    json.short_name = appName
+    const jsonString = JSON.stringify(json)
+    return new Response(jsonString)
+  }
+
   if (event.request.method !== 'POST') {
-    event.respondWith(fetch(event.request))
+    if (event.request.url.includes('localhost')) {
+      event.respondWith(responseWithAppName('AirDash Dev', event))
+    } else {
+      event.respondWith(fetch(event.request))
+    }
     return
   }
 
