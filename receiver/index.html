@@ -63,6 +63,7 @@
         const filename = conn.metadata.filename || 'unknown'
         const filepath = path.join(locationFolder(), filename)
         fs.writeFileSync(filepath, new Buffer(file))
+        conn.send('done')
       })
     })
     previousPeer = peer

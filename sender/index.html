@@ -10,20 +10,21 @@
   </head>
   <body>
     <h1>AirDash Local</h1>
-    <p>One click file transfer from Android to Computer</p>
+
+    <label>Connection ID <input id="connection-id" value=""></label>
+    <button id="select-connection-id">Set</button>
+    <span id="connection-id-field"></span>
+
+    <br><br>
 
     <form action="./" method="POST" enctype="multipart/form-data">
-      <input name="form" type="text" value="true">
-      <label>File <input name="formfile" type="file"></label>
-      <input type="submit">
+      <input name="form" type="hidden" value="true">
+      <input name="formfile" type="file">
+      <input id="submit" type="submit" value="Send file">
     </form>
 
-    <p>You can also share a file to this app from the Android share menu.</p>
-
-    <p>The file will be sent to the the connected computer</p>
-
-    <h3>Current Message</h3>
-    <pre id="message">Loading...</pre>
+    <h3>Status</h3>
+    <pre id="message"></pre>
 
     <script src="https://unpkg.com/localforage@1.7.3/dist/localforage.js"></script>
     <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
@@ -35,25 +36,89 @@
           console.log('sw failed', err)
         }
 
-        const file = await localforage.getItem('file')
-        const filename = await localforage.getItem('filename')
+        document.querySelector('#submit').onclick = () => {
+          setStatus('Preparing...')
+        }
 
-        if (file && filename) {
-          const peer = new peerjs.Peer()
-          const conn = peer.connect('flownio-airdash-simon', {metadata: { filename }})
-          conn.on('open', function() {
-            conn.send(file)
-            document.querySelector('#message').textContent = filename
-            console.log('File sent 2', filename, file)
-          })
-          conn.on('error', function(err) {
-            console.log('err', err)
-          })
+        document.querySelector('#connection-id-field').textContent = getConnectionId();
+        document.querySelector('#select-connection-id').onclick = async () => {
+          const idElem = document.querySelector('#connection-id')
+          if (idElem.value.length > 2) {
+            localStorage.setItem('connection-id', idElem.value)
+            document.querySelector('#connection-id-field').textContent = idElem.value
+          }
+          idElem.value = ''
+        }
+
+        function getConnectionId() {
+          return localStorage.getItem('connection-id') || 'simon'
+        }
+
+        const file = await localforage.getItem('file')
+        if (file) {
+          const filename = await localforage.getItem('filename') || 'unknown'
+          try {
+            await promiseTimeout(5000, sendFile(file, filename))
+          } catch(err) {
+            if (err === 'timeout') {
+              setStatus('Connection to receiver timed out. Make sure you have the correct connection id and try again.')
+            } else {
+              setStatus(err)
+            }
+          }
         } else {
           console.log('File was not stored')
           await localforage.iterate(function(value, key) {
             console.log('STORED', key, value);
           })
+        }
+
+        async function sendFile(file, filename) {
+          setStatus('Connecting...')
+          return new Promise((resolve, reject) => {
+            const peer = new peerjs.Peer()
+            const connectionId = `flownio-airdash-${getConnectionId()}`
+            const conn = peer.connect(connectionId, {metadata: { filename }})
+            conn.on('open', async function() {
+              setStatus('Sending...')
+              conn.send(file)
+            })
+            conn.on('data', async function(data) {
+              if (data === 'done') {
+                await localforage.clear()
+                setStatus('Sent ' + filename)
+                resolve('done')
+              } else {
+                console.log('unknown message', data)
+                setStatus('Unknown message ' + data)
+                reject(data)
+              }
+            })
+            conn.on('error', function(err) {
+              console.log('err', err)
+              setStatus(err)
+              reject(err)
+            })
+          })
+        }
+
+        function setStatus(status) {
+          document.querySelector('#message').textContent = status
+        }
+
+        function promiseTimeout(ms, promise) {
+          let timeout = new Promise((resolve, reject) => {
+            let id = setTimeout(() => {
+              clearTimeout(id);
+              reject('timeout')
+            }, ms)
+          })
+
+          // Returns a race between our timeout and the passed in promise
+          return Promise.race([
+            promise,
+            timeout
+          ])
         }
       })()
     </script>
