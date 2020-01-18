@@ -7,28 +7,48 @@
 </head>
 <body>
 <h1>AirDash</h1>
-<p>Easiest file transfer from Android to Computer</p>
-<p>Listening for files...</p>
+
+<button id="select-location">Choose Folder</button>
+<span id="location"></span>
+
+<br><br>
+
+<label>Connection ID <input id="connection-id" value="simonbengtsson-airdash"></label>
 
 <script src="../node_modules/peerjs/dist/peerjs.js"></script>
 <script>
-  const fs = require('fs')
-  const peer = new peerjs.Peer('simonbengtsson-airdash')
-  peer.on('connection', function(conn) {
-    conn.on('data', function(file) {
-      const filename = (conn.metadata && conn.metadata.filename) || 'unknown'
-      const path = messageFilePath(filename)
-      console.log('storing', path)
-      fs.writeFileSync(path, new Buffer(file))
+  document.querySelector('#location').textContent = locationFolder();
+
+  document.querySelector('#select-location').onclick = async () => {
+    const { dialog } = require('electron').remote;
+    const result = await dialog.showOpenDialog({
+      properties: ['openDirectory']
+    });
+    const location = result.filePaths[0]
+    if (location) {
+      localStorage.setItem('location', location)
+      document.querySelector('#location').textContent = location;
+    }
+  }
+
+  const connectionId = document.querySelector('#connection-id').value
+  const peer = new peerjs.Peer(connectionId)
+  peer.on('connection', (conn) => {
+    conn.on('data', (file) => {
+      const path = require('path')
+      const fs = require('fs')
+
+      const filename = conn.metadata.filename || 'unknown'
+      const filepath = path.join(locationFolder(), filename)
+      fs.writeFileSync(filepath, new Buffer(file))
     })
   })
 
-  function messageFilePath(filename) {
+  function locationFolder() {
     const path = require('path')
     const os = require('os')
-
     const desktopPath = path.join(os.homedir(), 'Desktop')
-    return path.join(desktopPath, filename)
+    return localStorage.getItem('location') || desktopPath
   }
 </script>
 </body>
