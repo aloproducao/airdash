@@ -1,33 +1,17 @@
-const { app, BrowserWindow } = require('electron')
+const { menubar } = require('menubar');
 
-let win
-
-function createWindow() {
-  win = new BrowserWindow({
-    width: 800,
-    height: 600,
+const mb = menubar({
+  index: 'file://' + __dirname + '/index.html',
+  preloadWindow: true,
+  browserWindow: {
     webPreferences: {
-      nodeIntegration: true,
+      nodeIntegration: true
     },
-  })
-
-  win.loadFile(__dirname + '/index.html')
-
-  win.on('closed', () => {
-    win = null
-  })
-}
-
-app.on('ready', createWindow)
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
+    width: 800,
+    height: 800
   }
-})
+});
 
-app.on('activate', () => {
-  if (win === null) {
-    createWindow()
-  }
-})
+mb.on('ready', () => {
+  console.log('app is ready');
+});
