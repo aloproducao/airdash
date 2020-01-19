@@ -23,8 +23,8 @@
     document.querySelector('#name').textContent = 'AirDash Dev'
   }
 
-  document.querySelector('#location').textContent = locationFolder();
-  document.querySelector('#connection-id-field').textContent = getConnectionId();
+  document.querySelector('#location').textContent = locationFolder()
+  document.querySelector('#connection-id-field').textContent = getConnectionId()
 
   document.querySelector('#select-connection-id').onclick = async () => {
     const idElem = document.querySelector('#connection-id')
@@ -37,19 +37,20 @@
   }
 
   document.querySelector('#select-location').onclick = async () => {
-    const { dialog } = require('electron').remote;
+    const { dialog } = require('electron').remote
     const result = await dialog.showOpenDialog({
-      properties: ['openDirectory']
-    });
+      properties: ['openDirectory'],
+    })
     const location = result.filePaths[0]
     if (location) {
       localStorage.setItem('location', location)
-      document.querySelector('#location').textContent = location;
+      document.querySelector('#location').textContent = location
     }
   }
 
-  let previousPeer = null;
+  let previousPeer = null
   reconnect()
+
   function reconnect() {
     if (previousPeer) previousPeer.destroy()
     const connectionId = `flownio-airdash-${getConnectionId()}`
