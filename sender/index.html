@@ -21,7 +21,13 @@
         }
 
         input {
-            border: solid 1px black;
+            border: solid 1px #aaa;
+            border-radius: 5px;
+            line-height: 30px;
+            padding: 15px;
+            outline: none;
+            font-size: 25px;
+            width: 145px;
         }
 
         #file-button {
@@ -52,11 +58,11 @@
     </ol>
 </section>
 <section>
-    <label for="connection-id" style="display: block; font-weight: bolder">Receiver Device ID</label>
+    <label for="connection-id" style="display: block; font-weight: bolder; margin-bottom: 10px;">Receiver Device ID</label>
     <input type="text" id="connection-id">
 </section>
 <section>
-    <p id="message">✅ Ready for files</p>
+    <p id="message" style="min-height: 20px;"></p>
 </section>
 <section style="margin-bottom: 40px">
     <form id="file-form" action="./" method="POST" enctype="multipart/form-data">
@@ -65,7 +71,7 @@
         <input id="file-input" name="formfile" type="file" style="opacity: 0; position: absolute; z-index: -1">
     </form>
     <p>Select a file to be transferred to the connected device. You can also share files from the share menu
-        directly</p>
+        directly.</p>
 </section>
 
 <script src="https://unpkg.com/localforage@1.7.3/dist/localforage.js"></script>
@@ -82,41 +88,83 @@
       document.querySelector('h1').textContent = 'AirDash Dev'
     }
 
-    document.querySelector('#file-input').onchange = (event) => {
-      console.log('File picked', event.target.files[0].name)
-      document.querySelector('#file-form').submit()
-      setStatus('Preparing...')
-    }
-
-    const connectionIdField = document.querySelector('#connection-id')
-    connectionIdField.value = getConnectionId()
-    connectionIdField.oninput = event => {
-      const newValue = event.target.value
-      console.log(newValue.length)
-      if (newValue.length >= 9) {
-        console.log('Done')
-      }
-    }
-
     function getConnectionId() {
-      return localStorage.getItem('connection-id') || 'simon'
+      return localStorage.getItem('connection-id') || '000-000-000'
     }
 
-    const error = await localforage.getItem('error')
-    const file = await localforage.getItem('file')
-    if (error) {
-      setStatus('Error: ' + error)
-    } else if (file) {
-      const filename = await localforage.getItem('filename') || 'unknown'
-      try {
-        await sendFile(file, filename)
-      } catch (err) {
-        setStatus(err)
+    setupFileInput()
+    setupDeviceId()
+    await handleStoredFile()
+
+    function setupFileInput() {
+      document.querySelector('#file-input').onchange = (event) => {
+        console.log('File picked', event.target.files[0].name)
+        document.querySelector('#file-form').submit()
+        setStatus('Preparing...')
       }
-    } else {
-      console.log('File was not stored')
-      await localforage.iterate(function(value, key) {
-        console.log('STORED', key, value)
+    }
+
+    function setupDeviceId() {
+      const connectionIdField = document.querySelector('#connection-id')
+      connectionIdField.value = getConnectionId()
+      connectionIdField.oninput = async event => {
+        const newValue = event.target.value
+        console.log('new connection id', newValue)
+        localStorage.setItem('connection-id', newValue)
+        if (newValue.length === 11) {
+          try {
+            setStatus('Connecting...')
+            await tryConnection()
+            setStatus('Ready')
+          } catch(err) {
+            setStatus(err)
+          }
+        } else {
+          setStatus('Enter Device ID')
+        }
+      }
+    }
+
+    async function handleStoredFile() {
+      const error = await localforage.getItem('error')
+      const file = await localforage.getItem('file')
+      if (error) {
+        setStatus('Error: ' + error)
+      } else if (file) {
+        const filename = await localforage.getItem('filename') || 'unknown'
+        try {
+          await sendFile(file, filename)
+        } catch (err) {
+          setStatus(err)
+        }
+      } else {
+        console.log('File was not stored')
+        await localforage.iterate(function(value, key) {
+          console.log('STORED', key, value)
+        })
+        setStatus('Ready')
+      }
+    }
+
+    async function tryConnection() {
+      return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject('Connection timed out. Make sure the device id is correct and try again.')
+        }, 5000)
+
+        const peer = new peerjs.Peer()
+        const id = getConnectionId() || ''
+        const connectionId = `flownio-airdash-${id}`
+        const conn = peer.connect(connectionId)
+        conn.on('open', async function() {
+          clearTimeout(timeout)
+          peer.destroy()
+          resolve('success')
+        })
+        conn.on('error', function(err) {
+          console.log('err', err)
+          reject(err)
+        })
       })
     }
 
@@ -124,11 +172,12 @@
       return new Promise((resolve, reject) => {
         setStatus('Connecting...')
         const timeout = setTimeout(() => {
-          reject('Connection to receiver timed out. Make sure you have the correct connection id and try again.')
+          reject('Connection timed out. Make sure the device id is correct and try again.')
         }, 5000)
 
         const peer = new peerjs.Peer()
-        const connectionId = `flownio-airdash-${getConnectionId()}`
+        const id = getConnectionId() || ''
+        const connectionId = `flownio-airdash-${id}`
         const conn = peer.connect(connectionId, { metadata: { filename } })
         conn.on('open', async function() {
           clearTimeout(timeout)
@@ -156,21 +205,6 @@
 
     function setStatus(status) {
       document.querySelector('#message').textContent = status
-    }
-
-    function promiseTimeout(ms, promise) {
-      let timeout = new Promise((resolve, reject) => {
-        let id = setTimeout(() => {
-          clearTimeout(id)
-          reject('timeout')
-        }, ms)
-      })
-
-      // Returns a race between our timeout and the passed in promise
-      return Promise.race([
-        promise,
-        timeout,
-      ])
     }
   })()
 </script>
