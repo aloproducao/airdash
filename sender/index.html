@@ -31,7 +31,7 @@
         }
 
         #file-button {
-            background: #1abc9c;
+            background: #25AE88;
             width: 100%;
             display: block;
             border-radius: 100px;
@@ -52,7 +52,7 @@
 <section>
     <h4>Guide</h4>
     <ol>
-        <li>Install the <a href="#">receiver app</a> on the device you want to send to</li>
+        <li>Install the <a href="https://flown.io/airdash">receiver app</a> on the device you want to send to</li>
         <li>Enter the receiver device id below</li>
         <li>Select file to be tranferred</li>
     </ol>
@@ -109,9 +109,9 @@
       connectionIdField.value = getConnectionId()
       connectionIdField.oninput = async event => {
         const newValue = event.target.value
-        console.log('new connection id', newValue)
         localStorage.setItem('connection-id', newValue)
         if (newValue.length === 11) {
+          console.log('New connection id', newValue)
           try {
             setStatus('Connecting...')
             await tryConnection()
