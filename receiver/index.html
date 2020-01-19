@@ -27,8 +27,26 @@
         body {
             background: #ececec;
         }
-        label {
-            display: block;
+        section {
+            margin-top: 20px;
+        }
+        .label-column {
+            display: inline-block;
+            width: 100px;
+            text-align: right;
+            vertical-align: top;
+            padding-right: 20px;
+        }
+        .value-column ol, .value-column p {
+            margin: 0;
+        }
+        .value-column ol {
+            padding-left: 20px;
+        }
+        .value-column {
+            vertical-align: top;
+            display: inline-block;
+            width: 350px;
         }
     </style>
 </head>
@@ -36,17 +54,47 @@
 
 <nav><h1 id="name">AirDash</h1></nav>
 
-<label>Status: </label>
-<label>Device ID: </label>
-<label>Location: </label>
-<button id="select-location">Choose Folder</button>
-<span id="location"></span>
+<section>
+    <div class="label-column">
+        <label>Status: </label>
+    </div>
+    <div class="value-column">
+        <p id="status">Ready, waiting for files</p>
+    </div>
+</section>
 
-<br><br>
+<section>
+    <div class="label-column">
+        <label>Guide: </label>
+    </div>
+    <div class="value-column">
+        <ol>
+            <li>Install the <a href="https://flown.io/airdash/airdash-receiver.zip">receiver app</a> on the device you want to send to</li>
+            <li>Enter the receiver device id below</li>
+            <li>Select file to be tranferred</li>
+        </ol>
+    </div>
+</section>
 
-<label>Connection ID <input id="connection-id" value=""></label>
-<button id="select-connection-id">Set</button>
-<span id="connection-id-field"></span>
+<section>
+    <div class="label-column">
+        <label>Device ID: </label>
+    </div>
+    <div class="value-column">
+        <input id="connection-id-input" value="">
+        <button id="refresh-button">Refresh</button>
+    </div>
+</section>
+
+<section>
+    <div class="label-column">
+        <label>Location: </label>
+    </div>
+    <div class="value-column">
+        <span id="location"></span>
+        <button id="select-location">Select...</button>
+    </div>
+</section>
 
 <script src="../node_modules/peerjs/dist/peerjs.js"></script>
 <script>
@@ -55,15 +103,11 @@
   }
 
   document.querySelector('#location').textContent = locationFolder()
-  document.querySelector('#connection-id-field').textContent = getConnectionId()
 
-  document.querySelector('#select-connection-id').onclick = async () => {
-    const idElem = document.querySelector('#connection-id')
-    if (idElem.value.length > 2) {
-      localStorage.setItem('connection-id', idElem.value)
-      document.querySelector('#connection-id-field').textContent = idElem.value
-    }
-    idElem.value = ''
+  const deviceIdField = document.querySelector('#connection-id-input')
+  deviceIdField.textContent = getConnectionId()
+  deviceIdField.onchange = (event) => {
+    localStorage.setItem('connection-id', event.target.value)
     reconnect()
   }
 
