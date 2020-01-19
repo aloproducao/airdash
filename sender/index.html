@@ -108,7 +108,7 @@
     }
 
     function getConnectionId() {
-      return localStorage.getItem('connection-id')
+      return localStorage.getItem('connection-id') || ''
     }
 
     setupFileInput()
