@@ -16,6 +16,20 @@
             font-family: Roboto, sans-serif;
         }
 
+        a, a:visited {
+            color: #25AE88;
+            font-weight: bolder;
+            text-decoration: none;
+        }
+
+        li {
+            padding-bottom: 5px;
+        }
+
+        a:hover {
+            border-bottom: solid 2px #25AE88;
+        }
+
         section {
             margin: 30px;
         }
@@ -52,7 +66,7 @@
 <section>
     <h4>Guide</h4>
     <ol>
-        <li>Install the <a href="https://flown.io/airdash">receiver app</a> on the device you want to send to</li>
+        <li>Install the <a href="https://flown.io">receiver app</a> on the device you want to send to</li>
         <li>Enter the receiver device id below</li>
         <li>Select file to be tranferred</li>
     </ol>
@@ -89,7 +103,7 @@
     }
 
     function getConnectionId() {
-      return localStorage.getItem('connection-id') || '000-000-000'
+      return localStorage.getItem('connection-id')
     }
 
     setupFileInput()
@@ -142,7 +156,11 @@
         await localforage.iterate(function(value, key) {
           console.log('STORED', key, value)
         })
-        setStatus('Ready')
+        if (getConnectionId().length === 11) {
+          setStatus('Ready')
+        } else {
+          setStatus('Enter device ID')
+        }
       }
     }
 
