@@ -10,7 +10,7 @@ const mb = menubar({
       nodeIntegration: true
     },
     width: 500,
-    height: isDev ? 600 : 400
+    height: isDev ? 600 : 300
   }
 });
 

@@ -69,9 +69,9 @@
     </div>
     <div class="value-column">
         <ol>
-            <li>Install the <a href="https://flown.io/airdash/airdash-receiver.zip">receiver app</a> on the device you want to send to</li>
-            <li>Enter the receiver device id below</li>
-            <li>Select file to be tranferred</li>
+            <li>Setup the  <a id="sender-app-link" href="#">sender app</a> with the device id below</li>
+            <li>Send files</li>
+            <li>Files will be added to the chosen location</li>
         </ol>
     </div>
 </section>
@@ -81,7 +81,7 @@
         <label>Device ID: </label>
     </div>
     <div class="value-column">
-        <input id="connection-id-input" value="">
+        <input id="connection-id-input" value="" style="width: 250px;" disabled>
         <button id="refresh-button">Refresh</button>
     </div>
 </section>
@@ -91,7 +91,7 @@
         <label>Location: </label>
     </div>
     <div class="value-column">
-        <span id="location"></span>
+        <input id="location" value="" style="width: 250px;" disabled>
         <button id="select-location">Select...</button>
     </div>
 </section>
@@ -102,12 +102,19 @@
     document.querySelector('#name').textContent = 'AirDash Dev'
   }
 
-  document.querySelector('#location').textContent = locationFolder()
+  document.querySelector('#sender-app-link').onclick = () => {
+    const { shell } = require('electron')
+    shell.openExternal('https://flown.io/airdash')
+  }
 
-  const deviceIdField = document.querySelector('#connection-id-input')
-  deviceIdField.textContent = getConnectionId()
-  deviceIdField.onchange = (event) => {
-    localStorage.setItem('connection-id', event.target.value)
+  document.querySelector('#location').value = locationFolder()
+  document.querySelector('#connection-id-input').value = getConnectionId()
+
+  document.querySelector('#refresh-button').onclick = () => {
+    const num = () => Math.floor(Math.random() * 900) + 100
+    const newId = `${num()}-${num()}-${num()}`
+    localStorage.setItem('connection-id', newId)
+    document.querySelector('#connection-id-input').value = newId
     reconnect()
   }
 
@@ -119,7 +126,7 @@
     const location = result.filePaths[0]
     if (location) {
       localStorage.setItem('location', location)
-      document.querySelector('#location').textContent = location
+      document.querySelector('#location').value = location
     }
   }
 
@@ -154,7 +161,7 @@
   }
 
   function getConnectionId() {
-    return localStorage.getItem('connection-id') || '000-000-000'
+    return localStorage.getItem('connection-id')
   }
 </script>
 </body>
