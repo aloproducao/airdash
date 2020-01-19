@@ -3,11 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <title>AirDash</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css" rel="stylesheet">
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';"/>
+
+    <style>
+        * {
+            font-family: "Helvetica Neue", sans-serif;
+        }
+        #name {
+            line-height: 50px;
+            text-align: center;
+            color: #444;
+            margin: 0;
+            font-size: 14px;
+            font-weight: normal;
+        }
+        nav {
+            background: #ddd;
+            height: 50px;
+            background: linear-gradient(#E5E5E5, #CDCDCD);
+            border-bottom: solid 1px #A8A8A8;
+        }
+        body {
+            background: #ececec;
+        }
+        label {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-<h1 id="name">AirDash</h1>
 
+<nav><h1 id="name">AirDash</h1></nav>
+
+<label>Status: </label>
+<label>Device ID: </label>
+<label>Location: </label>
 <button id="select-location">Choose Folder</button>
 <span id="location"></span>
 

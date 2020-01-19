@@ -9,8 +9,8 @@ const mb = menubar({
     webPreferences: {
       nodeIntegration: true
     },
-    width: 800,
-    height: 800
+    width: 500,
+    height: isDev ? 600 : 400
   }
 });
 
