@@ -16,7 +16,7 @@ self.addEventListener('fetch', event => {
 
   if (event.request.method !== 'POST') {
     if (event.request.url.includes('localhost')) {
-      event.respondWith(responseWithAppName('AirDash Dev', event))
+      event.respondWith(responseWithAppName('AirDash Dev 2', event))
     } else {
       event.respondWith(fetch(event.request))
     }
@@ -24,29 +24,31 @@ self.addEventListener('fetch', event => {
   }
 
   event.respondWith((async () => {
-    const formData = await event.request.formData()
-
     await localforage.clear()
-
-    if (!formData.get('form')) {
-      let file = formData.get('file') || ''
-      if (!file) {
-        file = formData.get('imaging')
-        if (file) {
-          console.log('IMAGING NAME CONFIRMED', file)
+    try {
+      const formData = await event.request.formData()
+      if (!formData.get('form')) {
+        let file = formData.get('file') || ''
+        if (!file) {
+          file = formData.get('imaging')
+          if (file) {
+            console.log('IMAGING NAME CONFIRMED', file)
+          }
+        } else {
+          console.log('Name was still "file"')
         }
+        await localforage.setItem('file', file)
+        await localforage.setItem('filename', file.name)
       } else {
-        console.log('Name was still "file"')
+        const file = formData.get('formfile') || 'none'
+
+        await localforage.setItem('file', file)
+        await localforage.setItem('filename', file.name)
+
+        console.log(`File "${file.name}" stored`)
       }
-      await localforage.setItem('file', file)
-      await localforage.setItem('filename', file.name)
-    } else {
-      const file = formData.get('formfile') || 'none'
-
-      await localforage.setItem('file', file)
-      await localforage.setItem('filename', file.name)
-
-      console.log(`File "${file.name}" stored`)
+    } catch(err) {
+      await localforage.setItem('error', 'unsupported_file')
     }
 
     return Response.redirect('./')
