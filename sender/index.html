@@ -157,10 +157,6 @@
           setStatus(err)
         }
       } else {
-        console.log('File was not stored')
-        await localforage.iterate(function(value, key) {
-          console.log('STORED', key, value)
-        })
         if (getConnectionId().length === 11) {
           setStatus('Ready')
         } else {
