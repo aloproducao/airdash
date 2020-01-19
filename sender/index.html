@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="manifest" href="./manifest.json" />
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="manifest" href="./manifest.json"/>
     <link rel="apple-touch-icon" href="./logo.png">
     <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
@@ -12,150 +12,150 @@
     <title>AirDash</title>
 
     <style>
-      * {
-        font-family: 'Roboto', sans-serif;
-      }
+        * {
+            font-family: 'Roboto', sans-serif;
+        }
     </style>
-  </head>
-  <body>
-    <h1>AirDash</h1>
+</head>
+<body>
+<h1>AirDash</h1>
 
-    <div class="mdc-text-field mdc-text-field--outlined">
-      <input type="text" id="tf-outlined" class="mdc-text-field__input">
-      <div class="mdc-notched-outline">
+<div class="mdc-text-field mdc-text-field--outlined">
+    <input type="text" id="tf-outlined" class="mdc-text-field__input">
+    <div class="mdc-notched-outline">
         <div class="mdc-notched-outline__leading"></div>
         <div class="mdc-notched-outline__notch">
-          <label for="tf-outlined" class="mdc-floating-label">Device ID</label>
+            <label for="tf-outlined" class="mdc-floating-label">Device ID</label>
         </div>
         <div class="mdc-notched-outline__trailing"></div>
-      </div>
     </div>
+</div>
 
-    <br>
-    <br>
-    <br>
+<br>
+<br>
+<br>
 
-    <label>Connection ID <input id="connection-id" value=""></label>
-    <button id="select-connection-id">Set</button>
-    <span id="connection-id-field"></span>
+<label>Connection ID <input id="connection-id" value=""></label>
+<button id="select-connection-id">Set</button>
+<span id="connection-id-field"></span>
 
-    <br><br>
+<br><br>
 
-    <form action="./" method="POST" enctype="multipart/form-data">
-      <input name="form" type="hidden" value="true">
-      <input name="formfile" type="file">
-      <input id="submit" type="submit" value="Send file">
-    </form>
+<form action="./" method="POST" enctype="multipart/form-data">
+    <input name="form" type="hidden" value="true">
+    <input name="formfile" type="file">
+    <input id="submit" type="submit" value="Send file">
+</form>
 
-    <h3>Status</h3>
-    <pre id="message"></pre>
+<h3>Status</h3>
+<pre id="message"></pre>
 
-    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-    <script src="https://unpkg.com/localforage@1.7.3/dist/localforage.js"></script>
-    <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
-    <script>
-      ;(async function() {
-        try {
-          await navigator.serviceWorker.register('./sw.js')
-        } catch(err) {
-          console.log('sw failed', err)
-        }
+<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+<script src="https://unpkg.com/localforage@1.7.3/dist/localforage.js"></script>
+<script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
+<script>
+  ;(async function() {
+    try {
+      await navigator.serviceWorker.register('./sw.js')
+    } catch (err) {
+      console.log('sw failed', err)
+    }
 
-        if (window.location.host.includes('localhost')) {
-          document.querySelector('h1').textContent = 'AirDash Dev'
-        }
+    if (window.location.host.includes('localhost')) {
+      document.querySelector('h1').textContent = 'AirDash Dev'
+    }
 
-        new mdc.textField.MDCTextField(document.querySelector('.mdc-text-field'));
+    new mdc.textField.MDCTextField(document.querySelector('.mdc-text-field'))
 
-        document.querySelector('#submit').onclick = () => {
-          setStatus('Preparing...')
-        }
+    document.querySelector('#submit').onclick = () => {
+      setStatus('Preparing...')
+    }
 
-        document.querySelector('#connection-id-field').textContent = getConnectionId();
-        document.querySelector('#select-connection-id').onclick = async () => {
-          const idElem = document.querySelector('#connection-id')
-          if (idElem.value.length > 2) {
-            localStorage.setItem('connection-id', idElem.value)
-            document.querySelector('#connection-id-field').textContent = idElem.value
+    document.querySelector('#connection-id-field').textContent = getConnectionId()
+    document.querySelector('#select-connection-id').onclick = async () => {
+      const idElem = document.querySelector('#connection-id')
+      if (idElem.value.length > 2) {
+        localStorage.setItem('connection-id', idElem.value)
+        document.querySelector('#connection-id-field').textContent = idElem.value
+      }
+      idElem.value = ''
+    }
+
+    function getConnectionId() {
+      return localStorage.getItem('connection-id') || 'simon'
+    }
+
+    const error = await localforage.getItem('error')
+    const file = await localforage.getItem('file')
+    if (error) {
+      setStatus('Error: ' + error)
+    } else if (file) {
+      const filename = await localforage.getItem('filename') || 'unknown'
+      try {
+        await sendFile(file, filename)
+      } catch (err) {
+        setStatus(err)
+      }
+    } else {
+      console.log('File was not stored')
+      await localforage.iterate(function(value, key) {
+        console.log('STORED', key, value)
+      })
+    }
+
+    async function sendFile(file, filename) {
+      return new Promise((resolve, reject) => {
+        setStatus('Connecting...')
+        const timeout = setTimeout(() => {
+          reject('Connection to receiver timed out. Make sure you have the correct connection id and try again.')
+        }, 5000)
+
+        const peer = new peerjs.Peer()
+        const connectionId = `flownio-airdash-${getConnectionId()}`
+        const conn = peer.connect(connectionId, { metadata: { filename } })
+        conn.on('open', async function() {
+          clearTimeout(timeout)
+          setStatus('Sending...')
+          conn.send(file)
+        })
+        conn.on('data', async function(data) {
+          if (data === 'done') {
+            await localforage.clear()
+            setStatus('Sent ' + filename)
+            resolve('done')
+          } else {
+            console.log('unknown message', data)
+            setStatus('Unknown message ' + data)
+            reject(data)
           }
-          idElem.value = ''
-        }
+        })
+        conn.on('error', function(err) {
+          console.log('err', err)
+          setStatus(err)
+          reject(err)
+        })
+      })
+    }
 
-        function getConnectionId() {
-          return localStorage.getItem('connection-id') || 'simon'
-        }
+    function setStatus(status) {
+      document.querySelector('#message').textContent = status
+    }
 
-        const error = await localforage.getItem('error')
-        const file = await localforage.getItem('file')
-        if (error) {
-          setStatus('Error: ' + error)
-        } else if (file) {
-          const filename = await localforage.getItem('filename') || 'unknown'
-          try {
-            await sendFile(file, filename)
-          } catch(err) {
-            setStatus(err)
-          }
-        } else {
-          console.log('File was not stored')
-          await localforage.iterate(function(value, key) {
-            console.log('STORED', key, value);
-          })
-        }
+    function promiseTimeout(ms, promise) {
+      let timeout = new Promise((resolve, reject) => {
+        let id = setTimeout(() => {
+          clearTimeout(id)
+          reject('timeout')
+        }, ms)
+      })
 
-        async function sendFile(file, filename) {
-          return new Promise((resolve, reject) => {
-            setStatus('Connecting...')
-            const timeout = setTimeout(() => {
-              reject('Connection to receiver timed out. Make sure you have the correct connection id and try again.')
-            }, 5000)
-
-            const peer = new peerjs.Peer()
-            const connectionId = `flownio-airdash-${getConnectionId()}`
-            const conn = peer.connect(connectionId, {metadata: { filename }})
-            conn.on('open', async function() {
-              clearTimeout(timeout)
-              setStatus('Sending...')
-              conn.send(file)
-            })
-            conn.on('data', async function(data) {
-              if (data === 'done') {
-                await localforage.clear()
-                setStatus('Sent ' + filename)
-                resolve('done')
-              } else {
-                console.log('unknown message', data)
-                setStatus('Unknown message ' + data)
-                reject(data)
-              }
-            })
-            conn.on('error', function(err) {
-              console.log('err', err)
-              setStatus(err)
-              reject(err)
-            })
-          })
-        }
-
-        function setStatus(status) {
-          document.querySelector('#message').textContent = status
-        }
-
-        function promiseTimeout(ms, promise) {
-          let timeout = new Promise((resolve, reject) => {
-            let id = setTimeout(() => {
-              clearTimeout(id);
-              reject('timeout')
-            }, ms)
-          })
-
-          // Returns a race between our timeout and the passed in promise
-          return Promise.race([
-            promise,
-            timeout
-          ])
-        }
-      })()
-    </script>
-  </body>
+      // Returns a race between our timeout and the passed in promise
+      return Promise.race([
+        promise,
+        timeout,
+      ])
+    }
+  })()
+</script>
+</body>
 </html>
