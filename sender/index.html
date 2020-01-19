@@ -91,6 +91,7 @@
     <p>Select a file to be transferred. You can also share files from the share menu directly.</p>
 </section>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.5.3/cleave.js"></script>
 <script src="https://unpkg.com/localforage@1.7.3/dist/localforage.js"></script>
 <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
 <script>
@@ -100,6 +101,12 @@
     } catch (err) {
       console.log('sw failed', err)
     }
+
+    new Cleave('#connection-id', {
+      delimiter: '-',
+      blocks: [3, 3, 3],
+      numericOnly: true
+    });
 
     if (window.location.host.includes('localhost')) {
       document.querySelector('h1').textContent = 'AirDash Dev'
