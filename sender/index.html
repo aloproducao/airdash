@@ -5,7 +5,7 @@
     <link rel="manifest" href="./manifest.json"/>
     <link rel="apple-touch-icon" href="./logo.png">
     <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
-    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -13,44 +13,61 @@
 
     <style>
         * {
-            font-family: 'Roboto', sans-serif;
+            font-family: Roboto, sans-serif;
+        }
+
+        section {
+            margin: 30px;
+        }
+
+        input {
+            border: solid 1px black;
+        }
+
+        #file-button {
+            background: #1abc9c;
+            width: 100%;
+            display: block;
+            border-radius: 100px;
+            text-align: center;
+            line-height: 40px;
+            color: white;
         }
     </style>
 </head>
 <body>
-<h1>AirDash</h1>
+<section style="margin-top: 30px;">
+    <img src="./logo.png" style="width: 35px;  float: left;">
+    <h1 style="font-size: 20px; float: left; line-height: 35px; padding-left: 10px; margin: 0">
+        AirDash
+    </h1>
+    <div style="clear: both;"></div>
+</section>
+<section>
+    <h4>Guide</h4>
+    <ol>
+        <li>Install the <a href="#">receiver app</a> on the device you want to send to</li>
+        <li>Enter the receiver device id below</li>
+        <li>Select file to be tranferred</li>
+    </ol>
+</section>
+<section>
+    <label for="connection-id" style="display: block; font-weight: bolder">Receiver Device ID</label>
+    <input type="text" id="connection-id">
+</section>
+<section>
+    <p id="message">✅ Ready for files</p>
+</section>
+<section style="margin-bottom: 40px">
+    <form id="file-form" action="./" method="POST" enctype="multipart/form-data">
+        <input name="form" type="hidden" value="true">
+        <label for="file-input" id="file-button">Select file</label>
+        <input id="file-input" name="formfile" type="file" style="opacity: 0; position: absolute; z-index: -1">
+    </form>
+    <p>Select a file to be transferred to the connected device. You can also share files from the share menu
+        directly</p>
+</section>
 
-<div class="mdc-text-field mdc-text-field--outlined">
-    <input type="text" id="tf-outlined" class="mdc-text-field__input">
-    <div class="mdc-notched-outline">
-        <div class="mdc-notched-outline__leading"></div>
-        <div class="mdc-notched-outline__notch">
-            <label for="tf-outlined" class="mdc-floating-label">Device ID</label>
-        </div>
-        <div class="mdc-notched-outline__trailing"></div>
-    </div>
-</div>
-
-<br>
-<br>
-<br>
-
-<label>Connection ID <input id="connection-id" value=""></label>
-<button id="select-connection-id">Set</button>
-<span id="connection-id-field"></span>
-
-<br><br>
-
-<form action="./" method="POST" enctype="multipart/form-data">
-    <input name="form" type="hidden" value="true">
-    <input name="formfile" type="file">
-    <input id="submit" type="submit" value="Send file">
-</form>
-
-<h3>Status</h3>
-<pre id="message"></pre>
-
-<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
 <script src="https://unpkg.com/localforage@1.7.3/dist/localforage.js"></script>
 <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
 <script>
@@ -65,20 +82,20 @@
       document.querySelector('h1').textContent = 'AirDash Dev'
     }
 
-    new mdc.textField.MDCTextField(document.querySelector('.mdc-text-field'))
-
-    document.querySelector('#submit').onclick = () => {
+    document.querySelector('#file-input').onchange = (event) => {
+      console.log('File picked', event.target.files[0].name)
+      document.querySelector('#file-form').submit()
       setStatus('Preparing...')
     }
 
-    document.querySelector('#connection-id-field').textContent = getConnectionId()
-    document.querySelector('#select-connection-id').onclick = async () => {
-      const idElem = document.querySelector('#connection-id')
-      if (idElem.value.length > 2) {
-        localStorage.setItem('connection-id', idElem.value)
-        document.querySelector('#connection-id-field').textContent = idElem.value
+    const connectionIdField = document.querySelector('#connection-id')
+    connectionIdField.value = getConnectionId()
+    connectionIdField.oninput = event => {
+      const newValue = event.target.value
+      console.log(newValue.length)
+      if (newValue.length >= 9) {
+        console.log('Done')
       }
-      idElem.value = ''
     }
 
     function getConnectionId() {
