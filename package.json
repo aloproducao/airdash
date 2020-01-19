@@ -22,7 +22,8 @@
   "scripts": {
     "start": "electron . --dev",
     "start-sender": "live-server . --open=/sender",
-    "build-receiver": "npx electron-packager . --overwrite",
+    "build-receiver": "npx electron-packager . --overwrite && zip -r -y AirDash-darwin-x64/airdash-receiver.zip AirDash-darwin-x64/AirDash.app",
+    "deploy-receiver": "rsync -a -e 'ssh -p 3333' AirDash-darwin-x64/airdash-receiver.zip simonb@flown.io:/var/www/flown.io/airdash --stats --progress",
     "deploy-sender": "rsync -a -e 'ssh -p 3333' sender/ simonb@flown.io:/var/www/flown.io/airdash --stats --progress",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
