@@ -4,12 +4,36 @@
     <meta charset="UTF-8" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="apple-touch-icon" href="./logo.png">
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>AirDash</title>
+
+    <style>
+      * {
+        font-family: 'Roboto', sans-serif;
+      }
+    </style>
   </head>
   <body>
     <h1>AirDash</h1>
+
+    <div class="mdc-text-field mdc-text-field--outlined">
+      <input type="text" id="tf-outlined" class="mdc-text-field__input">
+      <div class="mdc-notched-outline">
+        <div class="mdc-notched-outline__leading"></div>
+        <div class="mdc-notched-outline__notch">
+          <label for="tf-outlined" class="mdc-floating-label">Device ID</label>
+        </div>
+        <div class="mdc-notched-outline__trailing"></div>
+      </div>
+    </div>
+
+    <br>
+    <br>
+    <br>
 
     <label>Connection ID <input id="connection-id" value=""></label>
     <button id="select-connection-id">Set</button>
@@ -26,6 +50,7 @@
     <h3>Status</h3>
     <pre id="message"></pre>
 
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
     <script src="https://unpkg.com/localforage@1.7.3/dist/localforage.js"></script>
     <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
     <script>
@@ -39,6 +64,8 @@
         if (window.location.host.includes('localhost')) {
           document.querySelector('h1').textContent = 'AirDash Dev'
         }
+
+        new mdc.textField.MDCTextField(document.querySelector('.mdc-text-field'));
 
         document.querySelector('#submit').onclick = () => {
           setStatus('Preparing...')
@@ -58,8 +85,11 @@
           return localStorage.getItem('connection-id') || 'simon'
         }
 
+        const error = await localforage.getItem('error')
         const file = await localforage.getItem('file')
-        if (file) {
+        if (error) {
+          setStatus('Error: ' + error)
+        } else if (file) {
           const filename = await localforage.getItem('filename') || 'unknown'
           try {
             await sendFile(file, filename)

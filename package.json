@@ -4,6 +4,7 @@
   "main": "./receiver/main.js",
   "dependencies": {
     "electron-is-dev": "^1.1.0",
+    "material-components-web": "^4.0.0",
     "menubar": "^7.2.0",
     "peerjs": "^1.2.0"
   },
