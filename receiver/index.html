@@ -32,7 +32,7 @@
         }
         .label-column {
             display: inline-block;
-            width: 100px;
+            width: 120px;
             text-align: right;
             vertical-align: top;
             padding-right: 20px;
@@ -46,7 +46,29 @@
         .value-column {
             vertical-align: top;
             display: inline-block;
-            width: 350px;
+            width: 370px;
+        }
+        button {
+            background: #fff;
+            border-radius: 5px;
+            padding: 2px 20px;
+            border: 1px solid #ddd;
+            outline: none;
+        }
+        button:active {
+            background: linear-gradient(#5A92F7, #225FDD);
+            color: #fff;
+        }
+
+        a, a:visited {
+            color: #225FDD;
+        }
+
+        input {
+            border-radius: 5px;
+            padding: 2px 5px;
+            border: 1px solid #ddd;
+            outline: none;
         }
     </style>
 </head>
@@ -59,7 +81,10 @@
         <label>Status: </label>
     </div>
     <div class="value-column">
-        <p id="status">Ready, waiting for files</p>
+        <p id="status">
+            <span style="background: #25AE88; border-radius: 100px; width: 10px; height: 10px; display: inline-block; margin-right: 5px;"></span>
+            Ready, waiting for files
+        </p>
     </div>
 </section>
 
@@ -81,7 +106,7 @@
         <label>Device ID: </label>
     </div>
     <div class="value-column">
-        <input id="connection-id-input" value="" style="width: 250px;" disabled>
+        <input id="connection-id-input" value="" style="width: 230px;" disabled>
         <button id="refresh-button">Refresh</button>
     </div>
 </section>
@@ -91,7 +116,7 @@
         <label>Location: </label>
     </div>
     <div class="value-column">
-        <input id="location" value="" style="width: 250px;" disabled>
+        <input id="location" value="" style="width: 230px;" disabled>
         <button id="select-location">Select...</button>
     </div>
 </section>
