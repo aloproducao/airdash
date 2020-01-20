@@ -136,11 +136,7 @@
   document.querySelector('#connection-id-input').value = getConnectionId()
 
   document.querySelector('#refresh-button').onclick = () => {
-    const num = () => Math.floor(Math.random() * 900) + 100
-    const newId = `${num()}-${num()}-${num()}`
-    localStorage.setItem('connection-id', newId)
-    document.querySelector('#connection-id-input').value = newId
-    reconnect()
+    refreshDeviceId()
   }
 
   document.querySelector('#select-location').onclick = async () => {
@@ -157,6 +153,17 @@
 
   let previousPeer = null
   reconnect()
+  if (!getConnectionId()) {
+    refreshDeviceId()
+  }
+
+  function refreshDeviceId() {
+    const num = () => Math.floor(Math.random() * 900) + 100
+    const newId = `${num()}-${num()}-${num()}`
+    localStorage.setItem('connection-id', newId)
+    document.querySelector('#connection-id-input').value = newId
+    reconnect()
+  }
 
   function reconnect() {
     if (previousPeer) previousPeer.destroy()
@@ -186,7 +193,7 @@
   }
 
   function getConnectionId() {
-    return localStorage.getItem('connection-id')
+    return localStorage.getItem('connection-id') || ''
   }
 </script>
 </body>
