@@ -15,6 +15,10 @@ const mb = menubar({
 });
 
 mb.on('ready', () => {
+  mb.tray.on('drop-files', function(event, files) {
+    console.log('drop-files!', files);
+  });
+
   console.log('App is ready');
   mb.showWindow()
   if (isDev) mb.window.openDevTools()
