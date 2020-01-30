@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "electron": "^7.1.9",
+    "electron-installer-dmg": "^3.0.0",
     "electron-packager": "^14.2.0",
     "live-server": "^1.2.1",
     "prettier": "^1.19.1"
@@ -21,9 +22,11 @@
   "scripts": {
     "start": "electron . --dev",
     "start-sender": "live-server . --open=/sender",
-    "build-receiver": "npx electron-packager . --overwrite --icon=receiver/logo.icns",
-    "deploy-receiver": "zip -r -y AirDash-darwin-x64/airdash-receiver.zip AirDash-darwin-x64/AirDash.app && rsync -a -e 'ssh -p 3333' AirDash-darwin-x64/airdash-receiver.zip simonb@flown.io:/var/www/flown.io/airdash --stats --progress",
-    "deploy-sender": "rsync -a -e 'ssh -p 3333' sender/ simonb@flown.io:/var/www/flown.io/airdash --stats --progress",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build-receiver": "npx electron-packager . --overwrite --icon=receiver/logo.icns --platform=darwin,win32 --arch=x64 --out=dist --code-sign=true --osx-sign.identity='5A724B81727D91F5AD445C132BD142840A58F8C9' --osx-sign.type=distribution",
+    "dmg-receiver": "electron-installer-dmg dist/AirDash-darwin-x64/AirDash.app AirDash --out=dist --icon=receiver/logo.icns --overwrite",
+    "zip-receiver": "npm run dmg-receiver && zip -r -y dist/airdash-win32.zip dist/AirDash-win32-x64",
+    "upload-receiver": "rsync -a -e 'ssh -p 3333' dist/AirDash.dmg simonb@flown.io:/var/www/flown.io/airdash --stats --progress && rsync -a -e 'ssh -p 3333' dist/airdash-win32.zip simonb@flown.io:/var/www/flown.io/airdash --stats --progress",
+    "deploy-receiver": "npm run build-receiver && npm run zip-receiver && npm run upload-receiver",
+    "deploy-sender": "rsync -a -e 'ssh -p 3333' sender/ simonb@flown.io:/var/www/flown.io/airdash --stats --progress"
   }
 }
