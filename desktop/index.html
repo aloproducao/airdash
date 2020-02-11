@@ -10,43 +10,29 @@
         * {
             font-family: "Helvetica Neue", sans-serif;
         }
-        #name {
-            line-height: 50px;
-            text-align: center;
-            color: #444;
-            margin: 0;
-            font-size: 14px;
+        header {
+            padding: 15px 20px 15px 20px;
+            box-shadow: 0 0 5px 0 rgba(0,0,0,0.2);
+        }
+        header, section {
+            padding-right: 20px;
+            padding-left: 20px;
+        }
+        #app-logo {
+            margin-right: 10px;
+            display: inline-block;
+            width: 30px;
+            vertical-align: top;
+        }
+        #app-name {
+            font-size: 22px;
             font-weight: normal;
-        }
-        nav {
-            background: #ddd;
-            height: 50px;
-            background: linear-gradient(#E5E5E5, #CDCDCD);
-            border-bottom: solid 1px #A8A8A8;
-        }
-        body {
-            background: #ececec;
+            margin: 0;
+            line-height: 30px;
+            display: inline-block;
         }
         section {
             margin-top: 20px;
-        }
-        .label-column {
-            display: inline-block;
-            width: 120px;
-            text-align: right;
-            vertical-align: top;
-            padding-right: 20px;
-        }
-        .value-column ol, .value-column p {
-            margin: 0;
-        }
-        .value-column ol {
-            padding-left: 20px;
-        }
-        .value-column {
-            vertical-align: top;
-            display: inline-block;
-            width: 370px;
         }
         button {
             background: #fff;
@@ -56,70 +42,43 @@
             outline: none;
         }
         button:active {
-            background: linear-gradient(#5A92F7, #225FDD);
+            background: #25AE88;
             color: #fff;
         }
-
-        a, a:visited {
-            color: #225FDD;
-        }
-
         input {
+            background: #eee;
+            border: 0;
             border-radius: 5px;
-            padding: 2px 5px;
-            border: 1px solid #ddd;
-            outline: none;
+            padding: 3px 5px;
+        }
+        .body {
+            color: #555;
+            font-size: 14px;
+            margin-top: 7px;
         }
     </style>
 </head>
 <body>
 
-<nav><h1 id="name">AirDash</h1></nav>
+<header>
+    <img id="app-logo" src="logo.png"  alt="App Logo"/>
+    <h1 id="app-name">AirDash</h1>
+</header>
 
 <section>
-    <div class="label-column">
-        <label>Status: </label>
-    </div>
-    <div class="value-column">
-        <p id="status">
-            <span style="background: #25AE88; border-radius: 100px; width: 10px; height: 10px; display: inline-block; margin-right: 5px;"></span>
-            Ready, waiting for files
-        </p>
-    </div>
+    <p id="connection-id" style="font-size: 22px; margin: 0;"></p>
+    <p class="body">Use this device code to connect with another device</p>
 </section>
 
 <section>
-    <div class="label-column">
-        <label>Guide: </label>
-    </div>
-    <div class="value-column">
-        <ol>
-            <li>Setup the  <a id="sender-app-link" href="#">sender app</a> with the device id below</li>
-            <li>Send files</li>
-            <li>Files will be added to the chosen location</li>
-        </ol>
-    </div>
-</section>
-
-<section>
-    <div class="label-column">
-        <label>Device ID: </label>
-    </div>
-    <div class="value-column">
-        <input id="connection-id-input" value="" style="width: 230px;" disabled>
-        <button id="refresh-button">Refresh</button>
-    </div>
-</section>
-
-<section>
-    <div class="label-column">
-        <label>Location: </label>
-    </div>
     <div class="value-column">
         <input id="location" value="" style="width: 230px;" disabled>
-        <button id="select-location">Select...</button>
+        <button id="select-location">Select</button>
+        <p class="body">Select location for received files</p>
     </div>
 </section>
+
+<p id="message"></p>
 
 <script src="../node_modules/peerjs/dist/peerjs.js"></script>
 <script src="app.js"></script>

@@ -1,18 +1,9 @@
 if (require('electron-is-dev')) {
-  document.querySelector('#name').textContent = 'AirDash Dev'
-}
-
-document.querySelector('#sender-app-link').onclick = () => {
-  const { shell } = require('electron')
-  shell.openExternal('https://flown.io/airdash')
+  document.querySelector('#app-name').textContent = 'AirDash Dev'
 }
 
 document.querySelector('#location').value = locationFolder()
-document.querySelector('#connection-id-input').value = getConnectionId()
-
-document.querySelector('#refresh-button').onclick = () => {
-  refreshDeviceId()
-}
+document.querySelector('#connection-id').textContent = getConnectionId()
 
 document.querySelector('#select-location').onclick = async () => {
   const { dialog } = require('electron').remote
@@ -36,7 +27,7 @@ function refreshDeviceId() {
   const num = () => Math.floor(Math.random() * 900) + 100
   const newId = `${num()}-${num()}-${num()}`
   localStorage.setItem('connection-id', newId)
-  document.querySelector('#connection-id-input').value = newId
+  document.querySelector('#connection-id').textContent = newId
   reconnect()
 }
 
