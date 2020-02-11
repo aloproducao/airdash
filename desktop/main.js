@@ -3,7 +3,7 @@ const isDev = require('electron-is-dev')
 
 const mb = menubar({
   index: 'file://' + __dirname + '/index.html',
-  icon: __dirname + '/icon.png',
+  icon: __dirname + '/trayIconTemplate.png',
   preloadWindow: true,
   browserWindow: {
     webPreferences: {
