@@ -21,12 +21,12 @@
   },
   "scripts": {
     "start": "electron . --dev",
-    "start-sender": "live-server . --open=/sender",
+    "start-web": "live-server . --open=/web",
     "build-desktop": "npx electron-packager . --overwrite --icon=desktop/logo.icns --platform=darwin,win32 --arch=x64 --out=dist --code-sign=true --osx-sign.identity='5A724B81727D91F5AD445C132BD142840A58F8C9' --osx-sign.type=distribution",
     "dmg-desktop": "electron-installer-dmg dist/AirDash-darwin-x64/AirDash.app AirDash --out=dist --icon=desktop/logo.icns --overwrite",
     "zip-desktop": "npm run dmg-desktop && zip -r -y dist/AirDash-Win32.zip dist/AirDash-win32-x64",
     "upload-desktop": "rsync -a -e 'ssh -p 3333' dist/AirDash.dmg simonb@flown.io:/var/www/flown.io/airdash --stats --progress && rsync -a -e 'ssh -p 3333' dist/airdash-win32.zip simonb@flown.io:/var/www/flown.io/airdash --stats --progress",
     "deploy-desktop": "npm run build-desktop && npm run zip-desktop && npm run upload-desktop",
-    "deploy-sender": "rsync -a -e 'ssh -p 3333' sender/ simonb@flown.io:/var/www/flown.io/airdash --stats --progress"
+    "deploy-web": "rsync -a -e 'ssh -p 3333' web/ simonb@flown.io:/var/www/flown.io/airdash --stats --progress"
   }
 }
