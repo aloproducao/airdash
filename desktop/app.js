@@ -37,14 +37,21 @@ function reconnect() {
   const peer = new peerjs.Peer(connectionId)
   console.log(`Listening on ${connectionId}...`)
   peer.on('connection', (conn) => {
-    conn.on('data', (file) => {
+    conn.on('open', () => {
+      const hostname = require('os').hostname()
+      const name = hostname
+        .replace(/\.local/g, '')
+        .replace(/-/g, ' ')
+      conn.send({type: 'connected', deviceName: name})
+    })
+    conn.on('data', (data) => {
       const path = require('path')
       const fs = require('fs')
 
       const filename = conn.metadata.filename || 'unknown'
       const filepath = path.join(locationFolder(), filename)
-      fs.writeFileSync(filepath, new Buffer(file))
-      conn.send('done')
+      fs.writeFileSync(filepath, new Buffer(data))
+      conn.send({type: 'done'})
       console.log('Received ' + filepath)
 
       notifyFileSaved(filename, filepath)
