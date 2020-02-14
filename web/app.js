@@ -66,9 +66,11 @@ function renderAddDevice() {
   }
 }
 
-function addDeviceInputFocusOut() {
-  showAddButton = true
-  render()
+function addDeviceInputFocusOut(element) {
+  if (!element.disabled) {
+    showAddButton = true
+    render()
+  }
 }
 
 function addDeviceClicked() {
@@ -80,29 +82,51 @@ function addDeviceClicked() {
 function addDeviceInputChanged(element) {
   if (element.value.length === 11) {
     const code = document.querySelector('#code-input').value
-    addDevice(code)
-    element.blur()
+    addDevice(code, element)
   }
 }
 
 function getDevices() {
-  console.log(JSON.parse(localStorage.getItem('devices') || '{}'))
-  return JSON.parse(localStorage.getItem('devices') || '{}')
+  const devices = JSON.parse(localStorage.getItem('devices') || '{}')
+  return devices
 }
 
-function addDevice(code) {
-  const devices = getDevices()
-  devices[code] = {name: code}
-  localStorage.setItem('devices', JSON.stringify(devices))
+async function addDevice(code, element) {
+  element.disabled = true
+  setStatus('Connecting...')
+  try {
+    const result = await tryConnection(code)
+    const newDevice = {name: result.name || code, addedAt: new Date()}
+    const devices = getDevices()
+    devices[code] = newDevice
+    localStorage.setItem('devices', JSON.stringify(devices))
+    render()
+  } catch(error) {
+    setStatus(error)
+    element.disabled = false
+    element.focus()
+  }
 }
 
 function renderDeviceRow(id, device, checked) {
   return `
-    <div>
-      <input style="margin-bottom: 10px;" type="radio" id="${id}" onchange="deviceClicked(this)" name="device" value="${id}" ${checked ? 'checked' : ''}>
-      <label for="${id}">${device.name}</label>
+    <div class="device" style="margin-bottom: 10px; cursor: pointer;" onclick="deviceRowClicked(this)">
+        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" style="padding-right: 15px;">
+            <input class="device-radio" type="radio" id="${id}" onchange="deviceClicked(this)" name="device" value="${id}" ${checked ? 'checked' : ''}>
+        </label>
+        <div style="display: inline-block; vertical-align: middle;">
+            <div style="font-size: 18px">${device.name}</div>
+            <div style="font-size: 14px; color: #555;">
+                <span class="device-status-indicator" style="border-radius: 10px; width: 10px; height: 10px; background: ${primaryColor}; margin-right: 5px; display: inline-block"></span> 
+                <span class="device-status">${id}</span>
+            </div>
+        </div>
     </div>
   `
+}
+
+function deviceRowClicked(element) {
+  element.querySelector('input').checked = true
 }
 
 function deviceClicked(element) {
@@ -136,31 +160,28 @@ async function handleStoredFile() {
     setStatus('Error: ' + error)
   } else if (file) {
     const filename = await localforage.getItem('filename') || 'unknown'
+    await localforage.clear()
     try {
       await sendFile(file, filename)
     } catch (err) {
       setStatus(err)
     }
   } else {
-    if (getConnectionId().length === 11) {
-      setStatus('Ready')
-    } else {
-      setStatus('Enter device ID')
-    }
+    setStatus('Ready')
   }
 }
 
-async function tryConnection() {
+async function tryConnection(deviceCode) {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
-      reject('Connection timed out. Make sure the device id is correct and try again.')
+      reject('Connection timed out. Make sure the device code is correct and try again.')
     }, 5000)
 
     const peer = new peerjs.Peer()
-    const id = getConnectionId() || ''
-    const connectionId = `flownio-airdash-${id}`
+    const connectionId = `flownio-airdash-${deviceCode}`
     const conn = peer.connect(connectionId)
     conn.on('open', async function() {
+      console.log('sdf')
       clearTimeout(timeout)
       peer.destroy()
       resolve('success')
@@ -174,7 +195,6 @@ async function tryConnection() {
 
 async function sendFile(file, filename) {
   return new Promise((resolve, reject) => {
-    setStatus('Connecting...')
     const timeout = setTimeout(() => {
       reject('Connection timed out. Make sure the device id is correct and try again.')
     }, 5000)
@@ -182,6 +202,8 @@ async function sendFile(file, filename) {
     const peer = new peerjs.Peer()
     const id = getConnectionId() || ''
     const connectionId = `flownio-airdash-${id}`
+    if (!id) return
+    setStatus('Connecting...')
     console.log(`Sending ${filename} to ${connectionId}...`)
     const conn = peer.connect(connectionId, { metadata: { filename } })
     conn.on('open', async function() {
@@ -191,7 +213,6 @@ async function sendFile(file, filename) {
     })
     conn.on('data', async function(data) {
       if (data === 'done') {
-        await localforage.clear()
         setStatus('Sent ' + filename)
         resolve('done')
       } else {
