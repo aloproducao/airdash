@@ -241,7 +241,8 @@ async function sendFile(file, filename) {
     })
     conn.on('data', async function(data) {
       const type = data && data.type
-      if (type === 'done') {
+      if (type === 'connected') {
+      } else if (type === 'done') {
         setStatus('Sent ' + filename)
         resolve('done')
       } else {
