@@ -34,6 +34,7 @@ function render() {
         <form>
             ${Object.entries(getDevices()).map(([id, obj], i) => renderDeviceRow(id, obj, id === getConnectionId())).join('')}
         </form>
+        <div style="clear:both;"></div>
         <div style="margin: 10px 0;">${renderAddDevice()}</div>
     </section>
     <section style="margin-bottom: 40px">
@@ -79,27 +80,19 @@ function addDeviceClicked() {
   document.querySelector('#code-input').focus()
 }
 
-function addDeviceInputChanged(element) {
+async function addDeviceInputChanged(element) {
   if (element.value.length === 11) {
     const code = document.querySelector('#code-input').value
-    addDevice(code, element)
+    await tryAddingDevice(code, element)
   }
 }
 
-function getDevices() {
-  const devices = JSON.parse(localStorage.getItem('devices') || '{}')
-  return devices
-}
-
-async function addDevice(code, element) {
+async function tryAddingDevice(code, element) {
   element.disabled = true
   setStatus('Connecting...')
   try {
     const result = await tryConnection(code)
-    const newDevice = {name: result.name || code, addedAt: new Date()}
-    const devices = getDevices()
-    devices[code] = newDevice
-    localStorage.setItem('devices', JSON.stringify(devices))
+    addDevice(code, result.name || code)
     render()
   } catch(error) {
     setStatus(error)
@@ -110,19 +103,41 @@ async function addDevice(code, element) {
 
 function renderDeviceRow(id, device, checked) {
   return `
-    <div class="device" style="margin-bottom: 10px; cursor: pointer;" onclick="deviceRowClicked(this)">
+    <div class="device" style="background: none; cursor: pointer;" onclick="deviceRowClicked(this)">
         <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" style="padding-right: 15px;">
             <input class="device-radio" type="radio" id="${id}" onchange="deviceClicked(this)" name="device" value="${id}" ${checked ? 'checked' : ''}>
         </label>
-        <div style="display: inline-block; vertical-align: middle;">
+        <div style="display: inline-block; padding: 10px; vertical-align: middle;">
             <div style="font-size: 18px">${device.name}</div>
             <div style="font-size: 14px; color: #555;">
                 <span class="device-status-indicator" style="border-radius: 10px; width: 10px; height: 10px; background: ${primaryColor}; margin-right: 5px; display: inline-block"></span> 
                 <span class="device-status">${id}</span>
             </div>
         </div>
+        <button style="cursor: pointer; background: none; border: 0; padding: 14px; outline: none; color: #aaa; float: right;" onclick="removeDeviceClicked('${id}')">
+            <i class="material-icons">close</i>
+        </button>
     </div>
   `
+}
+
+function removeDeviceClicked(id) {
+  let devices = getDevices()
+  delete devices[id]
+  localStorage.setItem('devices', JSON.stringify(devices))
+  render();
+}
+
+function getDevices() {
+  const devices = JSON.parse(localStorage.getItem('devices') || '{}')
+  return devices
+}
+
+function addDevice(code, name) {
+  const newDevice = {name, addedAt: new Date()}
+  const devices = getDevices()
+  devices[code] = newDevice
+  localStorage.setItem('devices', JSON.stringify(devices))
 }
 
 function deviceRowClicked(element) {
