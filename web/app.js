@@ -61,9 +61,14 @@ function renderAddDevice() {
   if (showAddButton) {
     return `<button style="cursor: pointer; background: none; border: none; outline: 0; color: ${primaryColor}; padding: 10px 0;" onclick="addDeviceClicked(this)">+ Add Receiving Device</button>`
   } else {
-    const codeInputs = `<input id="code-input" oninput="addDeviceInputChanged(this)" >`
+    const codeInputs = `<input id="code-input" oninput="addDeviceInputChanged(this)" onfocusout="addDeviceInputFocusOut(this)">`
     return codeInputs + `<p>Enter device code</p>`
   }
+}
+
+function addDeviceInputFocusOut() {
+  showAddButton = true
+  render()
 }
 
 function addDeviceClicked() {
@@ -76,8 +81,6 @@ function addDeviceInputChanged(element) {
   if (element.value.length === 11) {
     const code = document.querySelector('#code-input').value
     addDevice(code)
-    showAddButton = true
-    render()
     element.blur()
   }
 }
