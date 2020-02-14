@@ -19,6 +19,11 @@ const primaryColor = '#25AE88'
 let showAddButton = true
 
 function render() {
+  let activeDevice = getActiveDevice()
+  const devices = getDevices()
+  if (!devices[activeDevice]) {
+    activeDevice = Object.keys(devices)[0]
+  }
   const content = `
     <section style="margin-top: 30px;">
         <img src="./logo.png" style="width: 35px;  float: left;">
@@ -32,7 +37,7 @@ function render() {
     </section>
     <section>
         <form>
-            ${Object.entries(getDevices()).map(([id, obj], i) => renderDeviceRow(id, obj, id === getConnectionId())).join('')}
+            ${Object.entries(devices).map(([id, obj], i) => renderDeviceRow(id, obj, id === activeDevice)).join('')}
         </form>
         <div style="clear:both;"></div>
         <div style="margin: 10px 0;">${renderAddDevice()}</div>
@@ -93,6 +98,7 @@ async function tryAddingDevice(code, element) {
   try {
     const result = await tryConnection(code)
     addDevice(code, result.deviceName || code)
+    setActiveDevice(code)
     showAddButton = true
     render()
   } catch(error) {
@@ -146,7 +152,11 @@ function deviceRowClicked(element) {
 }
 
 function deviceClicked(element) {
-  localStorage.setItem('connection-id', element.value)
+  setActiveDevice(element.value)
+}
+
+function setActiveDevice(code) {
+  localStorage.setItem('connection-id', code)
 }
 
 function setupInstallPrompt() {
@@ -159,7 +169,7 @@ function setupInstallPrompt() {
   });
 }
 
-function getConnectionId() {
+function getActiveDevice() {
   return localStorage.getItem('connection-id') || ''
 }
 
@@ -216,12 +226,13 @@ async function sendFile(file, filename) {
       reject('Connection timed out. Make sure the device id is correct and try again.')
     }, 5000)
 
-    const peer = new peerjs.Peer()
-    const id = getConnectionId() || ''
-    const connectionId = `flownio-airdash-${id}`
+    const id = getActiveDevice() || ''
     if (!id) return
+    const connectionId = `flownio-airdash-${id}`
     setStatus('Connecting...')
     console.log(`Sending ${filename} to ${connectionId}...`)
+
+    const peer = new peerjs.Peer()
     const conn = peer.connect(connectionId, { metadata: { filename } })
     conn.on('open', async function() {
       clearTimeout(timeout)
