@@ -38,16 +38,6 @@
             margin: 30px auto;
         }
 
-        input {
-            border: solid 1px #aaa;
-            border-radius: 5px;
-            line-height: 30px;
-            padding: 15px;
-            outline: none;
-            font-size: 25px;
-            width: 145px;
-        }
-
         #file-button {
             background: #25AE88;
             width: 100%;
@@ -57,34 +47,20 @@
             line-height: 40px;
             color: white;
         }
+
+        #code-input {
+            outline: none;
+            border-radius: 3px;
+            padding: 8px;
+            font-size: 16px;
+            margin-right: 5px;
+            border: solid #ccc 1px;
+        }
     </style>
 </head>
 <body>
-<div>
 
-</div>
-<section style="margin-top: 30px;">
-    <img src="./logo.png" style="width: 35px;  float: left;">
-    <h1 style="font-size: 20px; float: left; line-height: 35px; padding-left: 10px; margin: 0">
-        AirDash
-    </h1>
-    <div style="clear: both;"></div>
-</section>
-<section>
-    <p>Share photos, documents and other files from <a href="https://flown.io/airdash" target="_blank">Web</a> and <a href="#" id="android-install">Android</a> to <a href="https://flown.io/airdash/AirDash-Win32.zip">Windows</a> and <a href="https://flown.io/airdash/AirDash.dmg">Mac</a>.</p>
-</section>
-<section>
-    <label for="connection-id" style="display: block; font-weight: bolder; margin-bottom: 10px;">Receiver Device Code</label>
-    <input type="text" id="connection-id">
-</section>
-<section style="margin-bottom: 40px">
-    <p id="message" style="min-height: 20px;"></p>
-    <form id="file-form" action="./" method="POST" enctype="multipart/form-data">
-        <input name="form" type="hidden" value="true">
-        <label for="file-input" id="file-button">Select file</label>
-        <input id="file-input" name="formfile" type="file" style="opacity: 0; position: absolute; z-index: -1">
-    </form>
-</section>
+<div id="content"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.5.3/cleave.js"></script>
 <script src="https://unpkg.com/localforage@1.7.3/dist/localforage.js"></script>

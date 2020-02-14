@@ -5,21 +5,106 @@
     console.log('sw failed', err)
   }
 
-  new Cleave('#connection-id', {
-    delimiter: '-',
-    blocks: [3, 3, 3],
-    numericOnly: true
-  });
+  render()
 
   if (window.location.host.includes('localhost')) {
     document.querySelector('h1').textContent = 'AirDash Dev'
   }
 
-  setupFileInput()
-  setupDeviceId()
   setupInstallPrompt()
   await handleStoredFile()
 })()
+
+const primaryColor = '#25AE88'
+let showAddButton = true
+
+function render() {
+  const content = `
+    <section style="margin-top: 30px;">
+        <img src="./logo.png" style="width: 35px;  float: left;">
+        <h1 style="font-size: 20px; float: left; line-height: 35px; padding-left: 10px; margin: 0">
+            AirDash
+        </h1>
+        <div style="clear: both;"></div>
+    </section>
+    <section>
+        <p>Share photos, documents and other files from <a href="https://flown.io/airdash" target="_blank">Web</a> and <a href="#" id="android-install">Android</a> to <a href="https://flown.io/airdash/AirDash-Win32.zip">Windows</a> and <a href="https://flown.io/airdash/AirDash.dmg">Mac</a>.</p>
+    </section>
+    <section>
+        <form>
+            ${Object.entries(getDevices()).map(([id, obj], i) => renderDeviceRow(id, obj, id === getConnectionId())).join('')}
+        </form>
+        <div style="margin: 10px 0;">${renderAddDevice()}</div>
+    </section>
+    <section style="margin-bottom: 40px">
+        <p id="message" style="min-height: 20px;"></p>
+        <form id="file-form" action="./" method="POST" enctype="multipart/form-data">
+            <input name="form" type="hidden" value="true">
+            <label for="file-input" id="file-button">Select file to send</label>
+            <input id="file-input" onchange="fileChanged(this)" name="formfile" type="file" style="opacity: 0; position: absolute; z-index: -1">
+        </form>
+    </section>
+  `
+  document.querySelector('#content').innerHTML = content
+
+  if (!showAddButton) {
+    new Cleave('#code-input', {
+      delimiter: '-',
+      blocks: [3, 3, 3],
+      numericOnly: true
+    });
+  }
+
+}
+
+function renderAddDevice() {
+  if (showAddButton) {
+    return `<button style="cursor: pointer; background: none; border: none; outline: 0; color: ${primaryColor}; padding: 10px 0;" onclick="addDeviceClicked(this)">+ Add Receiving Device</button>`
+  } else {
+    const codeInputs = `<input id="code-input" oninput="addDeviceInputChanged(this)" >`
+    return codeInputs + `<p>Enter device code</p>`
+  }
+}
+
+function addDeviceClicked() {
+  showAddButton = false
+  render()
+  document.querySelector('#code-input').focus()
+}
+
+function addDeviceInputChanged(element) {
+  if (element.value.length === 11) {
+    const code = document.querySelector('#code-input').value
+    addDevice(code)
+    showAddButton = true
+    render()
+    element.blur()
+  }
+}
+
+function getDevices() {
+  console.log(JSON.parse(localStorage.getItem('devices') || '{}'))
+  return JSON.parse(localStorage.getItem('devices') || '{}')
+}
+
+function addDevice(code) {
+  const devices = getDevices()
+  devices[code] = {name: code}
+  localStorage.setItem('devices', JSON.stringify(devices))
+}
+
+function renderDeviceRow(id, device, checked) {
+  return `
+    <div>
+      <input style="margin-bottom: 10px;" type="radio" id="${id}" onchange="deviceClicked(this)" name="device" value="${id}" ${checked ? 'checked' : ''}>
+      <label for="${id}">${device.name}</label>
+    </div>
+  `
+}
+
+function deviceClicked(element) {
+  localStorage.setItem('connection-id', element.value)
+}
 
 function setupInstallPrompt() {
   let deferredPrompt;
@@ -35,33 +120,10 @@ function getConnectionId() {
   return localStorage.getItem('connection-id') || ''
 }
 
-function setupFileInput() {
-  document.querySelector('#file-input').onchange = (event) => {
-    console.log('File picked', event.target.files[0].name)
-    document.querySelector('#file-form').submit()
-    setStatus('Preparing...')
-  }
-}
-
-function setupDeviceId() {
-  const connectionIdField = document.querySelector('#connection-id')
-  connectionIdField.value = getConnectionId()
-  connectionIdField.oninput = async event => {
-    const newValue = event.target.value
-    localStorage.setItem('connection-id', newValue)
-    if (newValue.length === 11) {
-      console.log('New connection id', newValue)
-      try {
-        setStatus('Connecting...')
-        await tryConnection()
-        setStatus('Ready')
-      } catch(err) {
-        setStatus(err)
-      }
-    } else {
-      setStatus('Enter Device ID')
-    }
-  }
+function fileChanged(element) {
+  console.log('File picked', element.files[0].name)
+  document.querySelector('#file-form').submit()
+  setStatus('Preparing...')
 }
 
 async function handleStoredFile() {
@@ -117,6 +179,7 @@ async function sendFile(file, filename) {
     const peer = new peerjs.Peer()
     const id = getConnectionId() || ''
     const connectionId = `flownio-airdash-${id}`
+    console.log(`Sending ${filename} to ${connectionId}...`)
     const conn = peer.connect(connectionId, { metadata: { filename } })
     conn.on('open', async function() {
       clearTimeout(timeout)
