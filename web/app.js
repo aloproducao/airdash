@@ -93,6 +93,7 @@ async function tryAddingDevice(code, element) {
   try {
     const result = await tryConnection(code)
     addDevice(code, result.deviceName || code)
+    showAddButton = true
     render()
   } catch(error) {
     setStatus(error)
