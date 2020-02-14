@@ -92,7 +92,7 @@ async function tryAddingDevice(code, element) {
   setStatus('Connecting...')
   try {
     const result = await tryConnection(code)
-    addDevice(code, result.name || code)
+    addDevice(code, result.deviceName || code)
     render()
   } catch(error) {
     setStatus(error)
@@ -196,10 +196,11 @@ async function tryConnection(deviceCode) {
     const connectionId = `flownio-airdash-${deviceCode}`
     const conn = peer.connect(connectionId)
     conn.on('open', async function() {
-      console.log('sdf')
-      clearTimeout(timeout)
-      peer.destroy()
-      resolve('success')
+      conn.on('data', (data) => {
+        clearTimeout(timeout)
+        peer.destroy()
+        resolve({ deviceName: data.deviceName })
+      })
     })
     conn.on('error', function(err) {
       console.log('err', err)
@@ -227,7 +228,8 @@ async function sendFile(file, filename) {
       conn.send(file)
     })
     conn.on('data', async function(data) {
-      if (data === 'done') {
+      const type = data && data.type
+      if (type === 'done') {
         setStatus('Sent ' + filename)
         resolve('done')
       } else {
