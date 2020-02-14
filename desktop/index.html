@@ -1,29 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>AirDash</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css" rel="stylesheet">
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <style>
         * {
             font-family: "Helvetica Neue", sans-serif;
         }
+
         header {
             padding: 15px 20px 15px 20px;
-            box-shadow: 0 0 5px 0 rgba(0,0,0,0.2);
+            box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2);
         }
-        header, section {
+
+        header,
+        section {
             padding-right: 20px;
             padding-left: 20px;
         }
+
         #app-logo {
             margin-right: 10px;
             display: inline-block;
             width: 30px;
             vertical-align: top;
         }
+
         #app-name {
             font-size: 22px;
             font-weight: normal;
@@ -31,9 +38,11 @@
             line-height: 30px;
             display: inline-block;
         }
+
         section {
             margin-top: 20px;
         }
+
         button {
             background: #fff;
             border-radius: 5px;
@@ -41,46 +50,106 @@
             border: 1px solid #ddd;
             outline: none;
         }
+
         button:active {
             background: #25AE88;
             color: #fff;
         }
+
         input {
             background: #eee;
             border: 0;
             border-radius: 5px;
             padding: 3px 5px;
         }
+
         .body {
-            color: #555;
-            font-size: 14px;
-            margin-top: 7px;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        .border-top {
+            border-top: 1px solid #E2E2E2;
+        }
+
+        .select-file-box {
+            width: 100%;
+            height: 92px;
+
+            border: 2px dashed #D7D7D7;
+            box-sizing: border-box;
+            border-radius: 16px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .select-file-box:-moz-drag-over {
+            border-color: #25AE88;
         }
     </style>
 </head>
+
 <body>
 
-<header>
-    <img id="app-logo" src="logo.png"  alt="App Logo"/>
-    <h1 id="app-name">AirDash</h1>
-</header>
+    <header>
+        <img id="app-logo" src="logo.png" alt="App Logo" />
+        <h1 id="app-name">AirDash</h1>
+    </header>
 
-<section>
-    <p id="connection-id" style="font-size: 22px; margin: 0;"></p>
-    <p class="body">Use this device code to connect with another device</p>
-</section>
+    <section>
+        <h3>Share</h3>
+        <div id="devices">
+            <div class="device" style="background: none; cursor: pointer;">
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" style="padding-right: 15px;">
+                    <input class="device-radio" type="radio" id="${id}">
+                </label>
+                <div style="display: inline-block; padding: 10px 10px 10px 0; vertical-align: middle;">
+                    <div style="font-size: 16px">MacOS</div>
+                    <div style="font-size: 12px; color: #555;margin-top: 4px;">
+                        <span class="device-status-indicator"
+                            style="border-radius: 10px; width: 10px; height: 10px; background: #25AE88; margin-right: 5px; display: inline-block"></span>
+                        <span class="device-status body">2 minutes ago</span>
+                    </div>
+                </div>
+                <button
+                    style="cursor: pointer; background: none; border: 0; padding: 14px; outline: none; color: #aaa; float: right;">
+                    <i class="material-icons">close</i>
+                </button>
+            </div>
+        </div>
+        <div style="margin-top: 10px;">
+            <p class="body" style="color: #25AE88;">+ Add Receiving Device</p>
+        </div>
+    </section>
+    <section>
+        <div class="select-file-box">
+            <p class="body"><span style="color: #25AE88;">Select</span> or drop files here</p>
+        </div>
+    </section>
 
-<section>
-    <div class="value-column">
-        <input id="location" value="" style="width: 230px;" disabled>
-        <button id="select-location">Select</button>
-        <p class="body">Select location for received files</p>
-    </div>
-</section>
+    <section>
+        <div class="border-top"></div>
+        <h3>Receive</h3>
+        <p id="connection-id" style="font-size: 22px; margin: 0;"></p>
+        <p class="body">Use this device code to connect with another device</p>
+    </section>
 
-<p id="message"></p>
+    <section>
+        <div class="value-column">
+            <input id="location" value="" style="width: 230px;" disabled>
+            <button id="select-location">Select</button>
+            <p class="body">Select location for received files</p>
+        </div>
+    </section>
 
-<script src="../node_modules/peerjs/dist/peerjs.js"></script>
-<script src="app.js"></script>
+    <p id="message"></p>
+
+    <script src="../node_modules/peerjs/dist/peerjs.js"></script>
+    <script src="app.js"></script>
 </body>
+
 </html>
