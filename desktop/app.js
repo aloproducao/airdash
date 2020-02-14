@@ -1,3 +1,5 @@
+const { ipcRenderer } = require('electron')
+
 if (require('electron-is-dev')) {
   document.querySelector('#app-name').textContent = 'AirDash Dev'
 }
@@ -16,6 +18,11 @@ document.querySelector('#select-location').onclick = async () => {
     document.querySelector('#location').value = location
   }
 }
+
+ipcRenderer.on('file', (sender, files) => {
+  // console.log('file', files)
+  // got files here :P
+})
 
 let previousPeer = null
 reconnect()
@@ -42,7 +49,7 @@ function reconnect() {
       const name = hostname
         .replace(/\.local/g, '')
         .replace(/-/g, ' ')
-      conn.send({type: 'connected', deviceName: name})
+      conn.send({ type: 'connected', deviceName: name })
     })
     conn.on('data', (data) => {
       const path = require('path')
@@ -51,7 +58,7 @@ function reconnect() {
       const filename = conn.metadata.filename || 'unknown'
       const filepath = path.join(locationFolder(), filename)
       fs.writeFileSync(filepath, new Buffer(data))
-      conn.send({type: 'done'})
+      conn.send({ type: 'done' })
       console.log('Received ' + filepath)
 
       notifyFileSaved(filename, filepath)
@@ -59,7 +66,6 @@ function reconnect() {
   })
   previousPeer = peer
 }
-
 
 function notifyFileSaved(filename, filepath) {
   const title = `New File from:  ${getConnectionId()}`
@@ -91,3 +97,4 @@ function locationFolder() {
 function getConnectionId() {
   return localStorage.getItem('connection-id') || ''
 }
+
