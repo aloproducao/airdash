@@ -1,4 +1,5 @@
 const { menubar } = require('menubar');
+const { app, powerMonitor } = require('electron')
 const isDev = require('electron-is-dev')
 
 const mb = menubar({
@@ -15,11 +16,17 @@ const mb = menubar({
 });
 
 mb.on('ready', () => {
+  console.log('App is ready');
+
+  powerMonitor.on('resume', () => {
+    // Fix for connections not working after device sleep
+    mb.window.reload()
+  })
+
   mb.tray.on('drop-files', function(event, files) {
     console.log('drop-files!', files);
   });
 
-  console.log('App is ready');
   mb.showWindow()
   if (isDev) mb.window.openDevTools()
 });
