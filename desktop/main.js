@@ -1,4 +1,4 @@
-const { menubar } = require('menubar');
+const { menubar } = require('menubar')
 const { app, powerMonitor } = require('electron')
 const isDev = require('electron-is-dev')
 
@@ -16,17 +16,18 @@ const mb = menubar({
 });
 
 mb.on('ready', () => {
-  console.log('App is ready');
+  console.log('App is ready')
 
   powerMonitor.on('resume', () => {
     // Fix for connections not working after device sleep
     mb.window.reload()
   })
 
-  mb.tray.on('drop-files', function(event, files) {
-    console.log('drop-files!', files);
-  });
+  if (!app.getLoginItemSettings().wasOpenedAsHidden) {
+    mb.showWindow()
+  }
 
-  mb.showWindow()
   if (isDev) mb.window.openDevTools()
-});
+})
+
+app.setLoginItemSettings({ openAtLogin: true, openAsHidden: true })
