@@ -1,7 +1,6 @@
 self.importScripts('https://unpkg.com/localforage@1.7.3/dist/localforage.js')
 
 self.addEventListener('fetch', event => {
-
   async function responseWithAppName(appName, event) {
     const res = await fetch(event.request)
     if (!res.url.includes('manifest.json')) {
@@ -27,7 +26,9 @@ self.addEventListener('fetch', event => {
     await localforage.clear()
     try {
       const formData = await event.request.formData()
-      if (!formData.get('form')) {
+      if (formData.get('text')) {
+        await localforage.setItem('rawtext', formData.get('form'))
+      } else if (!formData.get('form')) {
         let file = formData.get('file') || ''
         if (!file) {
           file = formData.get('imaging')
@@ -39,7 +40,7 @@ self.addEventListener('fetch', event => {
         }
         await localforage.setItem('file', file)
         await localforage.setItem('filename', file.name)
-      } else {
+      } else if (file) {
         const file = formData.get('formfile') || 'none'
 
         await localforage.setItem('file', file)
@@ -47,8 +48,9 @@ self.addEventListener('fetch', event => {
 
         console.log(`File "${file.name}" stored`)
       }
-    } catch(err) {
-      await localforage.setItem('error', 'unsupported_file')
+    } catch (err) {
+      console.log(err);
+      await localforage.setItem('error', err.message)
     }
 
     return Response.redirect('./')
