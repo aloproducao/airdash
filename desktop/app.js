@@ -109,7 +109,7 @@ function notify(title, body, icon, opts = {}, cb) {
 
 function notifyCopy(data) {
   const title = `Received Text from:  ${getConnectionId()}`
-  const body = `data`
+  const body = data
   const image = `${__dirname}/trayIconTemplate@2x.png`
   notify(title, body, image)
 }
