@@ -1,4 +1,4 @@
-(async function() {
+(async function () {
   try {
     await navigator.serviceWorker.register('./sw.js')
   } catch (err) {
@@ -13,12 +13,21 @@
 
   setupInstallPrompt()
   await handleStoredFile()
+
+  if (!getConnectionId()) {
+    refreshDeviceId()
+  }
 })()
 
 const primaryColor = '#25AE88'
 let showAddButton = true
 
 function render() {
+  let activeDevice = getActiveDevice()
+  const devices = getDevices()
+  if (!devices[activeDevice]) {
+    activeDevice = Object.keys(devices)[0]
+  }
   const content = `
     <section style="margin-top: 30px;">
         <img src="./logo.png" style="width: 35px;  float: left;">
@@ -32,7 +41,7 @@ function render() {
     </section>
     <section>
         <form>
-            ${Object.entries(getDevices()).map(([id, obj], i) => renderDeviceRow(id, obj, id === getConnectionId())).join('')}
+            ${Object.entries(devices).map(([id, obj], i) => renderDeviceRow(id, obj, id === activeDevice)).join('')}
         </form>
         <div style="clear:both;"></div>
         <div style="margin: 10px 0;">${renderAddDevice()}</div>
@@ -44,6 +53,15 @@ function render() {
             <label for="file-input" id="file-button">Select file to send</label>
             <input id="file-input" onchange="fileChanged(this)" name="formfile" type="file" style="opacity: 0; position: absolute; z-index: -1">
         </form>
+    </section>
+    <section>
+        <div class="border-top"></div>
+
+        <h4 class="subtitle">Receive</h4>
+
+        <h2 id="connection-id">${getConnectionId()}</h2>
+
+        <p>Use this connection code to connect with other devices</p>
     </section>
   `
   document.querySelector('#content').innerHTML = content
@@ -93,9 +111,10 @@ async function tryAddingDevice(code, element) {
   try {
     const result = await tryConnection(code)
     addDevice(code, result.deviceName || code)
+    setActiveDevice(code)
     showAddButton = true
     render()
-  } catch(error) {
+  } catch (error) {
     setStatus(error)
     element.disabled = false
     element.focus()
@@ -135,7 +154,7 @@ function getDevices() {
 }
 
 function addDevice(code, name) {
-  const newDevice = {name, addedAt: new Date()}
+  const newDevice = { name, addedAt: new Date() }
   const devices = getDevices()
   devices[code] = newDevice
   localStorage.setItem('devices', JSON.stringify(devices))
@@ -146,7 +165,11 @@ function deviceRowClicked(element) {
 }
 
 function deviceClicked(element) {
-  localStorage.setItem('connection-id', element.value)
+  setActiveDevice(element.value)
+}
+
+function setActiveDevice(code) {
+  localStorage.setItem('connection-id', code)
 }
 
 function setupInstallPrompt() {
@@ -159,7 +182,7 @@ function setupInstallPrompt() {
   });
 }
 
-function getConnectionId() {
+function getActiveDevice() {
   return localStorage.getItem('connection-id') || ''
 }
 
@@ -196,14 +219,14 @@ async function tryConnection(deviceCode) {
     const peer = new peerjs.Peer()
     const connectionId = `flownio-airdash-${deviceCode}`
     const conn = peer.connect(connectionId)
-    conn.on('open', async function() {
+    conn.on('open', async function () {
       conn.on('data', (data) => {
         clearTimeout(timeout)
         peer.destroy()
         resolve({ deviceName: data.deviceName })
       })
     })
-    conn.on('error', function(err) {
+    conn.on('error', function (err) {
       console.log('err', err)
       reject(err)
     })
@@ -216,21 +239,23 @@ async function sendFile(file, filename) {
       reject('Connection timed out. Make sure the device id is correct and try again.')
     }, 5000)
 
-    const peer = new peerjs.Peer()
-    const id = getConnectionId() || ''
-    const connectionId = `flownio-airdash-${id}`
+    const id = getActiveDevice() || ''
     if (!id) return
+    const connectionId = `flownio-airdash-${id}`
     setStatus('Connecting...')
     console.log(`Sending ${filename} to ${connectionId}...`)
+
+    const peer = new peerjs.Peer()
     const conn = peer.connect(connectionId, { metadata: { filename } })
-    conn.on('open', async function() {
+    conn.on('open', function () {
       clearTimeout(timeout)
       setStatus('Sending...')
-      conn.send(file)
+      conn.send(file) // file sent here
     })
-    conn.on('data', async function(data) {
+    conn.on('data', function (data) {
       const type = data && data.type
-      if (type === 'done') {
+      if (type === 'connected') {
+      } else if (type === 'done') {
         setStatus('Sent ' + filename)
         resolve('done')
       } else {
@@ -239,12 +264,23 @@ async function sendFile(file, filename) {
         reject(data)
       }
     })
-    conn.on('error', function(err) {
+    conn.on('error', function (err) {
       console.log('err', err)
       setStatus(err)
       reject(err)
     })
   })
+}
+
+function refreshDeviceId() {
+  const num = () => Math.floor(Math.random() * 900) + 100
+  const newId = `${num()}-${num()}-${num()}`
+  localStorage.setItem('connection-id', newId)
+  document.querySelector('#connection-id').textContent = newId
+}
+
+function getConnectionId() {
+  return localStorage.getItem('connection-id') || ''
 }
 
 function setStatus(status) {

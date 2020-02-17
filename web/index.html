@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8"/>
-    <link rel="manifest" href="./manifest.json"/>
+    <meta charset="UTF-8" />
+    <link rel="manifest" href="./manifest.json" />
     <link rel="apple-touch-icon" href="./logo.png">
     <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css" rel="stylesheet">
@@ -17,7 +18,8 @@
             font-family: Roboto, sans-serif;
         }
 
-        a, a:visited {
+        a,
+        a:visited {
             color: #25AE88;
             font-weight: bolder;
             text-decoration: none;
@@ -60,15 +62,29 @@
         #code-input:disabled {
             background: #ededed;
         }
+
+        .border-top {
+            border-top: 1px solid #E2E2E2;
+        }
+
+        .subtitle {
+            font-family: Helvetica Neue;
+            font-style: normal;
+            font-weight: bold;
+            font-size: 22px;
+            line-height: 27px;
+        }
     </style>
 </head>
+
 <body>
 
-<div id="content"></div>
+    <div id="content"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.5.3/cleave.js"></script>
-<script src="https://unpkg.com/localforage@1.7.3/dist/localforage.js"></script>
-<script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
-<script src="app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.5.3/cleave.js"></script>
+    <script src="https://unpkg.com/localforage@1.7.3/dist/localforage.js"></script>
+    <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
+    <script src="app.js"></script>
 </body>
+
 </html>
