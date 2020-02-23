@@ -304,18 +304,18 @@ function reconnect() {
     })
     conn.on('data', (data) => {
       if (RAW_TEXT && typeof data === 'string') {
+        conn.send({ type: 'done' })
         copyToClipboard(data)
         notifyCopy(data)
-        conn.send({ type: 'done' })
         return
       }
 
       // If it's a file we receive an ArrayBuffer here 
       if (data instanceof ArrayBuffer) {
         const filename = conn.metadata.filename || 'unknown'
+        conn.send({ type: 'done' })
         createAndDownloadBlobFile(data, filename)
         notifyFileSaved(filename)
-        conn.send({ type: 'done' })
         return
       }
     })
@@ -381,10 +381,10 @@ function checkNotificationPromise() {
 }
 
 function notify(title, body, icon) {
-  if (checkNotificationPromise) {
-    const notification = new Notification(title, { body, icon });
-    setTimeout(notification.close.bind(notification), 10000);
-  }
+  // if (checkNotificationPromise) {
+  const notification = new Notification(title, { body, icon });
+  setTimeout(notification.close.bind(notification), 10000);
+  // }
 }
 
 function notifyCopy(data) {
