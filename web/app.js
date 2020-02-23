@@ -47,6 +47,7 @@ function render() {
         <p id="message" style="min-height: 20px;"></p>
         <form id="file-form" action="./" method="POST" enctype="multipart/form-data">
             <input name="form" type="hidden" value="true">
+            <input name="rawtext" type="hidden" value="">
             <label for="file-input" id="file-button">Select file to send</label>
             <input id="file-input" onchange="fileChanged(this)" name="formfile" type="file" style="opacity: 0; position: absolute; z-index: -1">
         </form>
@@ -183,7 +184,7 @@ function fileChanged(element) {
 async function handleStoredFile() {
   const error = await localforage.getItem('error')
   const file = await localforage.getItem('file')
-  const rawtext = await localforage.getItem('rawtext')
+  const text = await localforage.getItem('text')
   if (error) {
     setStatus('Error: ' + error)
   } else if (file) {
@@ -194,8 +195,8 @@ async function handleStoredFile() {
     } catch (err) {
       setStatus(err)
     }
-  } else if (rawtext) {
-    await sendFile(rawtext, 'rawtext.txt')
+  } else if (text) {
+    await sendFile(text, `"${text.substr(0, 16)}"`)
   } else {
     setStatus('Ready')
   }

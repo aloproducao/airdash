@@ -27,7 +27,7 @@ self.addEventListener('fetch', event => {
     try {
       const formData = await event.request.formData()
       if (formData.get('text')) {
-        await localforage.setItem('rawtext', formData.get('form'))
+        await localforage.setItem('text', formData.get('text'))
       } else if (!formData.get('form')) {
         let file = formData.get('file') || ''
         if (!file) {
@@ -40,7 +40,7 @@ self.addEventListener('fetch', event => {
         }
         await localforage.setItem('file', file)
         await localforage.setItem('filename', file.name)
-      } else if (file) {
+      } else {
         const file = formData.get('formfile') || 'none'
 
         await localforage.setItem('file', file)

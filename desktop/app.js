@@ -59,6 +59,7 @@ function reconnect() {
       // TODO: this should be configured by the user at some point
       if (RAW_TEXT && typeof data === 'string') {
         clipboard.writeText(data)
+        conn.send({ type: 'done' })
         notifyCopy(data)
         return
       }
