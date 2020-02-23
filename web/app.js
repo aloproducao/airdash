@@ -1,4 +1,7 @@
-(async function() {
+const primaryColor = '#25AE88'
+let showAddButton = true;
+
+(async function () {
   try {
     await navigator.serviceWorker.register('./sw.js')
   } catch (err) {
@@ -15,8 +18,6 @@
   await handleStoredFile()
 })()
 
-const primaryColor = '#25AE88'
-let showAddButton = true
 
 function render() {
   let activeDevice = getActiveDevice()
@@ -46,6 +47,7 @@ function render() {
         <p id="message" style="min-height: 20px;"></p>
         <form id="file-form" action="./" method="POST" enctype="multipart/form-data">
             <input name="form" type="hidden" value="true">
+            <input name="rawtext" type="hidden" value="">
             <label for="file-input" id="file-button">Select file to send</label>
             <input id="file-input" onchange="fileChanged(this)" name="formfile" type="file" style="opacity: 0; position: absolute; z-index: -1">
         </form>
@@ -101,7 +103,7 @@ async function tryAddingDevice(code, element) {
     setActiveDevice(code)
     showAddButton = true
     render()
-  } catch(error) {
+  } catch (error) {
     setStatus(error)
     element.disabled = false
     element.focus()
@@ -141,7 +143,7 @@ function getDevices() {
 }
 
 function addDevice(code, name) {
-  const newDevice = {name, addedAt: new Date()}
+  const newDevice = { name, addedAt: new Date() }
   const devices = getDevices()
   devices[code] = newDevice
   localStorage.setItem('devices', JSON.stringify(devices))
@@ -182,6 +184,7 @@ function fileChanged(element) {
 async function handleStoredFile() {
   const error = await localforage.getItem('error')
   const file = await localforage.getItem('file')
+  const text = await localforage.getItem('text')
   if (error) {
     setStatus('Error: ' + error)
   } else if (file) {
@@ -192,6 +195,8 @@ async function handleStoredFile() {
     } catch (err) {
       setStatus(err)
     }
+  } else if (text) {
+    await sendFile(text, `"${text.substr(0, 16)}"`)
   } else {
     setStatus('Ready')
   }
@@ -206,14 +211,14 @@ async function tryConnection(deviceCode) {
     const peer = new peerjs.Peer()
     const connectionId = `flownio-airdash-${deviceCode}`
     const conn = peer.connect(connectionId)
-    conn.on('open', async function() {
+    conn.on('open', async function () {
       conn.on('data', (data) => {
         clearTimeout(timeout)
         peer.destroy()
         resolve({ deviceName: data.deviceName })
       })
     })
-    conn.on('error', function(err) {
+    conn.on('error', function (err) {
       console.log('err', err)
       reject(err)
     })
@@ -234,12 +239,12 @@ async function sendFile(file, filename) {
 
     const peer = new peerjs.Peer()
     const conn = peer.connect(connectionId, { metadata: { filename } })
-    conn.on('open', async function() {
+    conn.on('open', async function () {
       clearTimeout(timeout)
       setStatus('Sending...')
       conn.send(file)
     })
-    conn.on('data', async function(data) {
+    conn.on('data', async function (data) {
       const type = data && data.type
       if (type === 'connected') {
       } else if (type === 'done') {
@@ -251,7 +256,7 @@ async function sendFile(file, filename) {
         reject(data)
       }
     })
-    conn.on('error', function(err) {
+    conn.on('error', function (err) {
       console.log('err', err)
       setStatus(err)
       reject(err)
