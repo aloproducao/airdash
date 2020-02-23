@@ -56,6 +56,16 @@
             color: #fff;
         }
 
+        #file-button {
+            background: #25AE88;
+            width: 100%;
+            display: block;
+            border-radius: 100px;
+            text-align: center;
+            line-height: 40px;
+            color: white;
+        }
+
         input {
             background: #eee;
             border: 0;
@@ -100,36 +110,7 @@
         <h1 id="app-name">AirDash</h1>
     </header>
 
-    <section>
-        <h3>Share</h3>
-        <div id="devices">
-            <div class="device" style="background: none; cursor: pointer;">
-                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" style="padding-right: 15px;">
-                    <input class="device-radio" type="radio" id="${id}">
-                </label>
-                <div style="display: inline-block; padding: 10px 10px 10px 0; vertical-align: middle;">
-                    <div style="font-size: 16px">MacOS</div>
-                    <div style="font-size: 12px; color: #555;margin-top: 4px;">
-                        <span class="device-status-indicator"
-                            style="border-radius: 10px; width: 10px; height: 10px; background: #25AE88; margin-right: 5px; display: inline-block"></span>
-                        <span class="device-status body">2 minutes ago</span>
-                    </div>
-                </div>
-                <button
-                    style="cursor: pointer; background: none; border: 0; padding: 14px; outline: none; color: #aaa; float: right;">
-                    <i class="material-icons">close</i>
-                </button>
-            </div>
-        </div>
-        <div style="margin-top: 10px;">
-            <p class="body" style="color: #25AE88;">+ Add Receiving Device</p>
-        </div>
-    </section>
-    <section>
-        <div class="select-file-box">
-            <p class="body"><span style="color: #25AE88;">Select</span> or drop files here</p>
-        </div>
-    </section>
+    <div id="content"></div>
 
     <section>
         <div class="border-top"></div>
@@ -148,7 +129,8 @@
 
     <p id="message"></p>
 
-    <script src="../node_modules/peerjs/dist/peerjs.js"></script>
+    <script src="../node_modules/cleave.js/dist/cleave.min.js"></script>
+    <script src="../node_modules/peerjs/dist/peerjs.min.js"></script>
     <script src="app.js"></script>
 </body>
 

@@ -1,3 +1,7 @@
+const primaryColor = '#25AE88'
+let showAddButton = true
+let previousPeer = null;
+
 (async function () {
   try {
     await navigator.serviceWorker.register('./sw.js')
@@ -14,13 +18,13 @@
   setupInstallPrompt()
   await handleStoredFile()
 
-  if (!getConnectionId()) {
+  if (!getSelfConnectionId()) {
     refreshDeviceId()
+  } else {
+    reconnect()
   }
 })()
 
-const primaryColor = '#25AE88'
-let showAddButton = true
 
 function render() {
   let activeDevice = getActiveDevice()
@@ -59,7 +63,7 @@ function render() {
 
         <h4 class="subtitle">Receive</h4>
 
-        <h2 id="connection-id">${getConnectionId()}</h2>
+        <h2 id="self-connection-id">${getSelfConnectionId()}</h2>
 
         <p>Use this connection code to connect with other devices</p>
     </section>
@@ -73,7 +77,6 @@ function render() {
       numericOnly: true
     });
   }
-
 }
 
 function renderAddDevice() {
@@ -275,12 +278,34 @@ async function sendFile(file, filename) {
 function refreshDeviceId() {
   const num = () => Math.floor(Math.random() * 900) + 100
   const newId = `${num()}-${num()}-${num()}`
-  localStorage.setItem('connection-id', newId)
-  document.querySelector('#connection-id').textContent = newId
+  localStorage.setItem('self-connection-id', newId)
+  document.querySelector('#self-connection-id').textContent = newId
+}
+
+function reconnect() {
+  if (previousPeer) previousPeer.destroy()
+  const connectionId = `flownio-airdash-${getSelfConnectionId()}`
+  const peer = new peerjs.Peer(connectionId)
+  console.log(`Listening on ${connectionId}...`)
+  peer.on('connection', (conn) => {
+    console.log(`connection`)
+    conn.on('open', () => {
+      conn.send({ type: 'connected', deviceName: 'test' })
+    })
+    conn.on('data', (data) => {
+      console.log('Received ' + data)
+      conn.send({ type: 'done' })
+    })
+  })
+  previousPeer = peer
 }
 
 function getConnectionId() {
   return localStorage.getItem('connection-id') || ''
+}
+
+function getSelfConnectionId() {
+  return localStorage.getItem('self-connection-id') || ''
 }
 
 function setStatus(status) {
