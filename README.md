@@ -2,13 +2,13 @@
 
 Transfer photos and files anywhere. Discuss project on [FindCollab](https://findcollabs.com/project/7BK81zF3mZTpT0jjQ2hQ)
 
-![AirDash](https://raw.githubusercontent.com/simonbengtsson/airdash/master/promo.png)
+<img alt="AirDash" src="https://raw.githubusercontent.com/simonbengtsson/airdash/master/promo.png" height="200" />
 
 ## Getting Started
 
-`npm install`
-`npm run start-web` For web app
-`npm start` For desktop app
+- `npm install`
+- `npm run start-web` For web app
+- `npm start` For desktop app
 
 ## Architecture
 
@@ -20,8 +20,8 @@ The desktop app is built with [electronjs](https://www.electronjs.org).
 
 ## Deploy and build
 
-`npm run deploy-web`
-`npm run deploy-desktop`
+- `npm run deploy-web`
+- `npm run deploy-desktop`
 
 ## Contributing
 Pull requests are welcome. Go to [FindCollab](https://findcollabs.com/project/7BK81zF3mZTpT0jjQ2hQ) to see features and improvements in development.
