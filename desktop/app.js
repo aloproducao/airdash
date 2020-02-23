@@ -1,15 +1,20 @@
 const { ipcRenderer } = require('electron')
+const { dialog } = require('electron').remote;
+const path = require('path')
+const fs = require('fs')
+
 let showAddButton = true
 const primaryColor = '#25AE88'
 
 render();
+const { clipboard, nativeImage } = require('electron')
 
 if (require('electron-is-dev')) {
   document.querySelector('#app-name').textContent = 'AirDash Dev'
 }
 
 document.querySelector('#location').value = locationFolder()
-document.querySelector('#connection-id').textContent = getConnectionId()
+document.querySelector('#connection-id').textContent = getSelfConnectionId()
 
 document.querySelector('#select-location').onclick = async () => {
   const { dialog } = require('electron').remote
@@ -24,27 +29,36 @@ document.querySelector('#select-location').onclick = async () => {
 }
 
 ipcRenderer.on('file', (sender, files) => {
-  // console.log('file', files)
+  console.log('file', files)
+  let fileContent = fs.readFileSync(files[0])
+  let pathParsed = path.parse(files[0])
+  sendFile(fileContent, pathParsed.name + pathParsed.ext)
   // got files here :P
+  // sendFile();
 })
+// I add this "configs" here for now until some kind of user settings is in place 
+// Set to true to copy files to clipboard
+const COPY_FILE = true
+// Enable receiving raw text and automatically paste to clipboard
+const RAW_TEXT = true
 
 let previousPeer = null
 reconnect()
-if (!getConnectionId()) {
+if (!getSelfConnectionId()) {
   refreshDeviceId()
 }
 
 function refreshDeviceId() {
   const num = () => Math.floor(Math.random() * 900) + 100
   const newId = `${num()}-${num()}-${num()}`
-  localStorage.setItem('connection-id', newId)
+  localStorage.setItem('self-connection-id', newId)
   document.querySelector('#connection-id').textContent = newId
   reconnect()
 }
 
 function reconnect() {
   if (previousPeer) previousPeer.destroy()
-  const connectionId = `flownio-airdash-${getConnectionId()}`
+  const connectionId = `flownio-airdash-${getSelfConnectionId()}`
   const peer = new peerjs.Peer(connectionId)
   console.log(`Listening on ${connectionId}...`)
   peer.on('connection', (conn) => {
@@ -56,16 +70,35 @@ function reconnect() {
       conn.send({ type: 'connected', deviceName: name })
     })
     conn.on('data', (data) => {
-      const path = require('path')
-      const fs = require('fs')
+      console.log('data', data);
+      // If enabled and is a string we copy to clipboard
+      // TODO: this should be configured by the user at some point
+      if (RAW_TEXT && typeof data === 'string') {
+        clipboard.writeText(data)
+        conn.send({ type: 'done' })
+        notifyCopy(data)
+        return
+      }
 
-      const filename = conn.metadata.filename || 'unknown'
-      const filepath = path.join(locationFolder(), filename)
-      fs.writeFileSync(filepath, new Buffer(data))
-      conn.send({ type: 'done' })
-      console.log('Received ' + filepath)
+      // If it's a file we receive an ArrayBuffer here 
+      if (data instanceof ArrayBuffer) {
+        const filename = conn.metadata.filename || 'unknown'
+        const filepath = path.join(locationFolder(), filename)
+        const filebuffer = new Buffer(data)
+        fs.writeFileSync(filepath, filebuffer)
+        conn.send({ type: 'done' })
+        console.log('Received ' + filepath)
 
-      notifyFileSaved(filename, filepath)
+        // If enabled and is an image, write image to clipboard
+        if (COPY_FILE && isImage(filename)) {
+          clipboard.writeImage(
+            nativeImage.createFromPath(filepath)
+          )
+        }
+
+        notifyFileSaved(filename, filepath)
+        return
+      }
     })
   })
   previousPeer = peer
@@ -87,13 +120,9 @@ function render() {
     </section>
     <section style="margin-bottom: 40px">
         <p id="message" style="min-height: 20px;"></p>
-        <form id="file-form" action="./" method="POST" enctype="multipart/form-data">
-            <input name="form" type="hidden" value="true">
-            <div class="select-file-box">
-                <p class="body"><span style="color: #25AE88;">Select</span> or drop files here</p>
-            </div>
-            <input id="file-input" onchange="fileChanged(this)" name="formfile" type="file" style="opacity: 0; position: absolute; z-index: -1">
-        </form>
+        <div class="select-file-box">
+            <p class="body"><button onclick="selectFile()" style="color: #25AE88;">Select</button> or drop files here</p>
+        </div>
     </section>
   `
   document.querySelector('#content').innerHTML = content
@@ -173,7 +202,6 @@ function renderDeviceRow(id, device, checked) {
   `
 }
 
-
 function removeDeviceClicked(id) {
   let devices = getDevices()
   delete devices[id]
@@ -201,6 +229,58 @@ function deviceClicked(element) {
   setActiveDevice(element.value)
 }
 
+async function selectFile() {
+  let files = await dialog.showOpenDialog({
+    properties: ['openFile']
+  });
+
+  let filePaths = files.filePaths;
+  for (let filepath of filePaths) {
+    let fileContent = fs.readFileSync(filepath)
+    let pathParsed = path.parse(filepath)
+    sendFile(fileContent, pathParsed.name + pathParsed.ext)
+  }
+}
+
+async function sendFile(file, filename) {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject('Connection timed out. Make sure the device id is correct and try again.')
+    }, 5000)
+
+    const id = getActiveDevice() || ''
+    if (!id) return
+    const connectionId = `flownio-airdash-${id}`
+    setStatus('Connecting...')
+    console.log(`Sending ${filename} to ${connectionId}...`)
+
+    const peer = new peerjs.Peer()
+    const conn = peer.connect(connectionId, { metadata: { filename } })
+    conn.on('open', function () {
+      clearTimeout(timeout)
+      setStatus('Sending...')
+      conn.send(file) // file sent here
+    })
+    conn.on('data', function (data) {
+      const type = data && data.type
+      if (type === 'connected') {
+      } else if (type === 'done') {
+        setStatus('Sent ' + filename)
+        resolve('done')
+      } else {
+        console.log('unknown message', data)
+        setStatus('Unknown message ' + data)
+        reject(data)
+      }
+    })
+    conn.on('error', function (err) {
+      console.log('err', err)
+      setStatus(err)
+      reject(err)
+    })
+  })
+}
+
 function getActiveDevice() {
   return localStorage.getItem('connection-id') || ''
 }
@@ -209,14 +289,12 @@ function setActiveDevice(code) {
   localStorage.setItem('connection-id', code)
 }
 
-
-function notifyFileSaved(filename, filepath) {
-  const title = `New File from:  ${getConnectionId()}`
-  const image = `${__dirname}/trayIconTemplate@2x.png`
+function notify(title, body, icon, opts = {}, cb) {
   const notifOptions = {
-    body: `A new file has been saved, ${filename}`,
-    icon: isImage(filename) ? filepath : image,
+    body,
+    icon,
     silent: true,
+    ...opts,
   }
 
   const myNotification = new Notification(title, notifOptions)
@@ -224,6 +302,20 @@ function notifyFileSaved(filename, filepath) {
     // we can do something when user click file,
     // for example open the directory, or preview the file
   }
+}
+
+function notifyCopy(data) {
+  const title = `Received Text from:  ${getConnectionId()}`
+  const body = data
+  const image = `${__dirname}/trayIconTemplate@2x.png`
+  notify(title, body, image)
+}
+
+function notifyFileSaved(filename, filepath) {
+  const title = `New File from:  ${getConnectionId()}`
+  const body = `A new file has been saved, ${filename}`
+  const image = `${__dirname}/trayIconTemplate@2x.png`
+  notify(title, body, isImage(filename) ? filepath : image)
 }
 
 function isImage(filename) {
@@ -239,6 +331,10 @@ function locationFolder() {
 
 function getConnectionId() {
   return localStorage.getItem('connection-id') || ''
+}
+
+function getSelfConnectionId() {
+  return localStorage.getItem('self-connection-id') || ''
 }
 
 async function tryConnection(deviceCode) {

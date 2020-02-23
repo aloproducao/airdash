@@ -1,6 +1,11 @@
 const primaryColor = '#25AE88'
 let showAddButton = true
 let previousPeer = null;
+// I add this "configs" here for now until some kind of user settings is in place 
+// Set to true to copy files to clipboard
+const COPY_FILE = true
+// Enable receiving raw text and automatically paste to clipboard
+const RAW_TEXT = true;
 
 (async function () {
   try {
@@ -23,6 +28,8 @@ let previousPeer = null;
   } else {
     reconnect()
   }
+
+  requestNotificationAccess();
 })()
 
 
@@ -54,6 +61,7 @@ function render() {
         <p id="message" style="min-height: 20px;"></p>
         <form id="file-form" action="./" method="POST" enctype="multipart/form-data">
             <input name="form" type="hidden" value="true">
+            <input name="rawtext" type="hidden" value="">
             <label for="file-input" id="file-button">Select file to send</label>
             <input id="file-input" onchange="fileChanged(this)" name="formfile" type="file" style="opacity: 0; position: absolute; z-index: -1">
         </form>
@@ -198,6 +206,7 @@ function fileChanged(element) {
 async function handleStoredFile() {
   const error = await localforage.getItem('error')
   const file = await localforage.getItem('file')
+  const text = await localforage.getItem('text')
   if (error) {
     setStatus('Error: ' + error)
   } else if (file) {
@@ -208,6 +217,8 @@ async function handleStoredFile() {
     } catch (err) {
       setStatus(err)
     }
+  } else if (text) {
+    await sendFile(text, `"${text.substr(0, 16)}"`)
   } else {
     setStatus('Ready')
   }
@@ -288,16 +299,36 @@ function reconnect() {
   const peer = new peerjs.Peer(connectionId)
   console.log(`Listening on ${connectionId}...`)
   peer.on('connection', (conn) => {
-    console.log(`connection`)
     conn.on('open', () => {
       conn.send({ type: 'connected', deviceName: 'test' })
     })
     conn.on('data', (data) => {
-      console.log('Received ' + data)
-      conn.send({ type: 'done' })
+      if (RAW_TEXT && typeof data === 'string') {
+        copyToClipboard(data)
+        notifyCopy(data)
+        conn.send({ type: 'done' })
+        return
+      }
+
+      // If it's a file we receive an ArrayBuffer here 
+      if (data instanceof ArrayBuffer) {
+        const filename = conn.metadata.filename || 'unknown'
+        createAndDownloadBlobFile(data, filename)
+        notifyFileSaved(filename)
+        conn.send({ type: 'done' })
+        return
+      }
     })
   })
   previousPeer = peer
+}
+function copyToClipboard(secretInfo) {
+  var $tempInput = document.createElement('INPUT');
+  $body.appendChild($tempInput);
+  $tempInput.setAttribute('value', secretInfo)
+  $tempInput.select();
+  document.execCommand('copy');
+  $body.removeChild($tempInput);
 }
 
 function getConnectionId() {
@@ -310,4 +341,67 @@ function getSelfConnectionId() {
 
 function setStatus(status) {
   document.querySelector('#message').textContent = status
+}
+
+function createAndDownloadBlobFile(body, filename) {
+  const blob = new Blob([body]);
+  if (navigator.msSaveBlob) {
+    // IE 10+
+    navigator.msSaveBlob(blob, filename);
+  } else {
+    const link = document.createElement('a');
+    // Browsers that support HTML5 download attribute
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+}
+
+function requestNotificationAccess() {
+  Notification.requestPermission()
+    .then(function (result) {
+      console.log(result);
+    });
+}
+
+function checkNotificationPromise() {
+  try {
+    Notification.requestPermission().then();
+  } catch (e) {
+    return false;
+  }
+
+  return true;
+}
+
+function notify(title, body, icon) {
+  if (checkNotificationPromise) {
+    const notification = new Notification(title, { body, icon });
+    setTimeout(notification.close.bind(notification), 10000);
+  }
+}
+
+function notifyCopy(data) {
+  const title = `Received Text from: ${getConnectionId()}`
+  const body = data
+  const image = `./logo.png`
+  notify(title, body, image)
+}
+
+function notifyFileSaved(filename) {
+  const title = `New File from:  ${getConnectionId()}`
+  const body = `New file: ${filename}`
+  const image = `./logo.png`
+  notify(title, body, image)
+}
+
+
+function isImage(filename) {
+  return /jpg|png|jpeg|svg|gif|/.test(filename)
 }

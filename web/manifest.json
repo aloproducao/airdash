@@ -13,6 +13,7 @@
     "params": {
       "title": "title",
       "text": "text",
+      "rawtext": "rawtext",
       "url": "url",
       "files": [
         {"name": "file", "accept": ["*/*"]}

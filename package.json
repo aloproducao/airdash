@@ -4,6 +4,7 @@
   "main": "./desktop/main.js",
   "dependencies": {
     "cleave.js": "^1.5.3",
+    "clipboard": "^2.0.4",
     "electron-is-dev": "^1.1.0",
     "menubar": "^7.2.0",
     "peerjs": "^1.0.0"
