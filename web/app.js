@@ -49,9 +49,9 @@ function render() {
     <section style="margin-bottom: 40px">
         <p id="message" style="min-height: 20px;"></p>
         <form id="file-form" action="./" method="POST" enctype="multipart/form-data">
-            <input name="form" type="hidden" value="true">
             <input name="rawtext" type="hidden" value="">
             <label for="file-input" id="file-button">Select file to send</label>
+            <!-- bodyParser.js requires that the file input is the last element -->
             <input id="file-input" name="file" type="file" style="opacity: 0; position: absolute; z-index: -1">
         </form>
     </section>

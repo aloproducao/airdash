@@ -5,7 +5,7 @@ export async function parseFormData(request) {
   if (bodyBlob.size < oneMb) {
     // formData() freezes tab or browser when body is too large
     let formData = await request.formData()
-    const text = (formData.get('text') || '').trim()
+    const text = (formData.get('text') || formData.get('rawtext') || '').trim()
     if (text) {
       const preview = `"${text.substr(0, 16)}"`
       return { payload: text, meta: preview }
