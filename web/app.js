@@ -1,23 +1,36 @@
+import { tryConnection, sendPayload } from './connection.js'
+import { parseFormData } from './bodyParser.js'
+
+console.log('Loading app.js')
+
 const primaryColor = '#25AE88'
 let showAddButton = true;
 
-(async function () {
+;(async function () {
   try {
     await navigator.serviceWorker.register('./sw.js')
+    navigator.serviceWorker.addEventListener('message', swMessageReceived);
   } catch (err) {
     console.log('sw failed', err)
   }
 
   render()
-
-  if (window.location.host.includes('localhost')) {
-    document.querySelector('h1').textContent = 'AirDash Dev'
-  }
-
-  setupInstallPrompt()
-  await handleStoredFile()
 })()
 
+async function swMessageReceived(event) {
+  console.log('Message received')
+  let { body, headers } = event.data
+  const request = new Request('', { method: 'POST', body, headers })
+
+  try {
+    const { payload, meta } = await parseFormData(request)
+    const activeDevice = getActiveDevice() || ''
+    await sendPayload(payload, meta, activeDevice, setStatus)
+  } catch (error) {
+    console.error(error)
+    setStatus(error)
+  }
+}
 
 function render() {
   let activeDevice = getActiveDevice()
@@ -26,16 +39,6 @@ function render() {
     activeDevice = Object.keys(devices)[0]
   }
   const content = `
-    <section style="margin-top: 30px;">
-        <img src="./logo.png" style="width: 35px;  float: left;">
-        <h1 style="font-size: 20px; float: left; line-height: 35px; padding-left: 10px; margin: 0">
-            AirDash
-        </h1>
-        <div style="clear: both;"></div>
-    </section>
-    <section>
-        <p>Share photos, documents and other files from <a href="https://flown.io/airdash" target="_blank">Web</a> and <a href="#" id="android-install">Android</a> to <a href="https://flown.io/airdash/AirDash-Win32.zip">Windows</a> and <a href="https://flown.io/airdash/AirDash.dmg">Mac</a>.</p>
-    </section>
     <section>
         <form>
             ${Object.entries(devices).map(([id, obj], i) => renderDeviceRow(id, obj, id === activeDevice)).join('')}
@@ -49,12 +52,44 @@ function render() {
             <input name="form" type="hidden" value="true">
             <input name="rawtext" type="hidden" value="">
             <label for="file-input" id="file-button">Select file to send</label>
-            <input id="file-input" onchange="fileChanged(this)" name="formfile" type="file" style="opacity: 0; position: absolute; z-index: -1">
+            <input id="file-input" name="file" type="file" style="opacity: 0; position: absolute; z-index: -1">
         </form>
     </section>
   `
   document.querySelector('#content').innerHTML = content
+  attachDocument()
+}
 
+function renderAddDevice() {
+  if (showAddButton) {
+    return `<button  id="add-device-btn" style="cursor: pointer; background: none; border: none; outline: 0; color: ${primaryColor}; padding: 10px 0;">+ Add Receiving Device</button>`
+  } else {
+    const codeInputs = `<input id="code-input">`
+    return codeInputs + `<p>Enter device code</p>`
+  }
+}
+
+function renderDeviceRow(id, device, checked) {
+  return `
+    <div class="device" style="background: none; cursor: pointer;">
+        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" style="padding-right: 15px;">
+            <input class="device-radio" type="radio" id="${id}" name="device" value="${id}" ${checked ? 'checked' : ''}>
+        </label>
+        <div style="display: inline-block; padding: 10px; vertical-align: middle;">
+            <div style="font-size: 18px">${device.name}</div>
+            <div style="font-size: 14px; color: #555;">
+                <span class="device-status-indicator" style="border-radius: 10px; width: 10px; height: 10px; background: ${primaryColor}; margin-right: 5px; display: inline-block"></span> 
+                <span class="device-status">${id}</span>
+            </div>
+        </div>
+        <div class="remove-device-btn" style="cursor: pointer; background: none; border: 0; padding: 14px; outline: none; color: #aaa; float: right;" data-device-id="${id}">
+            <i class="material-icons">close</i>
+        </div>
+    </div>
+  `
+}
+
+function attachDocument() {
   if (!showAddButton) {
     new Cleave('#code-input', {
       delimiter: '-',
@@ -63,38 +98,83 @@ function render() {
     });
   }
 
-}
+  document
+    .querySelector('#file-input')
+    .addEventListener('change', (e) => {
+      const element = e.currentTarget
+      // We could send the file directly here, but submitting it with the form
+      // makes it easier to debug the service worker used for handling files from
+      // the Android share menu
+      console.log('File picked', element.files[0].name)
+      document.querySelector('#file-form').submit()
+      setStatus('Preparing...')
+    })
 
-function renderAddDevice() {
-  if (showAddButton) {
-    return `<button style="cursor: pointer; background: none; border: none; outline: 0; color: ${primaryColor}; padding: 10px 0;" onclick="addDeviceClicked(this)">+ Add Receiving Device</button>`
-  } else {
-    const codeInputs = `<input id="code-input" oninput="addDeviceInputChanged(this)" onfocusout="addDeviceInputFocusOut(this)">`
-    return codeInputs + `<p>Enter device code</p>`
+  const codeInputElement = () => document.querySelector('#code-input')
+  if (codeInputElement()) {
+    codeInputElement()
+      .addEventListener('focusout', (e) => {
+        if (!e.currentTarget.disabled) {
+          showAddButton = true
+          render()
+        }
+      })
+
+    codeInputElement()
+      .addEventListener('input', async (e) => {
+        const element = e.currentTarget
+        if (element.value.length === 11) {
+          await tryAddingDevice(element.value, element)
+        }
+      })
   }
-}
 
-function addDeviceInputFocusOut(element) {
-  if (!element.disabled) {
-    showAddButton = true
-    render()
-  }
-}
+  const addDeviceButton = document.querySelector('#add-device-btn')
+  if (addDeviceButton) {
+    addDeviceButton
+      .addEventListener('click', () => {
+        showAddButton = false
+        render()
+        codeInputElement().focus()
+      })
+   }
 
-function addDeviceClicked() {
-  showAddButton = false
-  render()
-  document.querySelector('#code-input').focus()
-}
+  document
+    .querySelectorAll('.remove-device-btn')
+    .forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        console.log('clicked', e.currentTarget.dataset)
+        let devices = getDevices()
+        const deviceId = e.currentTarget.dataset.deviceId
+        delete devices[deviceId]
+        localStorage.setItem('devices', JSON.stringify(devices))
+        render();
+        e.stopPropagation()
+      })
+    })
 
-async function addDeviceInputChanged(element) {
-  if (element.value.length === 11) {
-    const code = document.querySelector('#code-input').value
-    await tryAddingDevice(code, element)
-  }
+  document.querySelectorAll('.device')
+    .forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const element = e.currentTarget
+        element.querySelector('input').checked = true
+        setActiveDevice(element.value)
+      })
+    })
+
+  let deferredPrompt;
+  document.querySelector('#android-install')
+    .addEventListener('click', () => {
+      deferredPrompt.prompt()
+    })
+  window
+    .addEventListener('beforeinstallprompt', (e) => {
+      deferredPrompt = e
+    });
 }
 
 async function tryAddingDevice(code, element) {
+  console.log(code)
   element.disabled = true
   setStatus('Connecting...')
   try {
@@ -110,36 +190,8 @@ async function tryAddingDevice(code, element) {
   }
 }
 
-function renderDeviceRow(id, device, checked) {
-  return `
-    <div class="device" style="background: none; cursor: pointer;" onclick="deviceRowClicked(this)">
-        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" style="padding-right: 15px;">
-            <input class="device-radio" type="radio" id="${id}" onchange="deviceClicked(this)" name="device" value="${id}" ${checked ? 'checked' : ''}>
-        </label>
-        <div style="display: inline-block; padding: 10px; vertical-align: middle;">
-            <div style="font-size: 18px">${device.name}</div>
-            <div style="font-size: 14px; color: #555;">
-                <span class="device-status-indicator" style="border-radius: 10px; width: 10px; height: 10px; background: ${primaryColor}; margin-right: 5px; display: inline-block"></span> 
-                <span class="device-status">${id}</span>
-            </div>
-        </div>
-        <button style="cursor: pointer; background: none; border: 0; padding: 14px; outline: none; color: #aaa; float: right;" onclick="removeDeviceClicked('${id}')">
-            <i class="material-icons">close</i>
-        </button>
-    </div>
-  `
-}
-
-function removeDeviceClicked(id) {
-  let devices = getDevices()
-  delete devices[id]
-  localStorage.setItem('devices', JSON.stringify(devices))
-  render();
-}
-
 function getDevices() {
-  const devices = JSON.parse(localStorage.getItem('devices') || '{}')
-  return devices
+  return JSON.parse(localStorage.getItem('devices') || '{}')
 }
 
 function addDevice(code, name) {
@@ -149,119 +201,12 @@ function addDevice(code, name) {
   localStorage.setItem('devices', JSON.stringify(devices))
 }
 
-function deviceRowClicked(element) {
-  element.querySelector('input').checked = true
-}
-
-function deviceClicked(element) {
-  setActiveDevice(element.value)
-}
-
 function setActiveDevice(code) {
   localStorage.setItem('connection-id', code)
 }
 
-function setupInstallPrompt() {
-  let deferredPrompt;
-  document.querySelector('#android-install').addEventListener('click', () => {
-    deferredPrompt.prompt();
-  })
-  window.addEventListener('beforeinstallprompt', (e) => {
-    deferredPrompt = e;
-  });
-}
-
 function getActiveDevice() {
   return localStorage.getItem('connection-id') || ''
-}
-
-function fileChanged(element) {
-  console.log('File picked', element.files[0].name)
-  document.querySelector('#file-form').submit()
-  setStatus('Preparing...')
-}
-
-async function handleStoredFile() {
-  const error = await localforage.getItem('error')
-  const file = await localforage.getItem('file')
-  const text = await localforage.getItem('text')
-  if (error) {
-    setStatus('Error: ' + error)
-  } else if (file) {
-    const filename = await localforage.getItem('filename') || 'unknown'
-    await localforage.clear()
-    try {
-      await sendFile(file, filename)
-    } catch (err) {
-      setStatus(err)
-    }
-  } else if (text) {
-    await sendFile(text, `"${text.substr(0, 16)}"`)
-  } else {
-    setStatus('Ready')
-  }
-}
-
-async function tryConnection(deviceCode) {
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      reject('Connection timed out. Make sure the device code is correct and try again.')
-    }, 5000)
-
-    const peer = new peerjs.Peer()
-    const connectionId = `flownio-airdash-${deviceCode}`
-    const conn = peer.connect(connectionId)
-    conn.on('open', async function () {
-      conn.on('data', (data) => {
-        clearTimeout(timeout)
-        peer.destroy()
-        resolve({ deviceName: data.deviceName })
-      })
-    })
-    conn.on('error', function (err) {
-      console.log('err', err)
-      reject(err)
-    })
-  })
-}
-
-async function sendFile(file, filename) {
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      reject('Connection timed out. Make sure the device id is correct and try again.')
-    }, 5000)
-
-    const id = getActiveDevice() || ''
-    if (!id) return
-    const connectionId = `flownio-airdash-${id}`
-    setStatus('Connecting...')
-    console.log(`Sending ${filename} to ${connectionId}...`)
-
-    const peer = new peerjs.Peer()
-    const conn = peer.connect(connectionId, { metadata: { filename } })
-    conn.on('open', async function () {
-      clearTimeout(timeout)
-      setStatus('Sending...')
-      conn.send(file)
-    })
-    conn.on('data', async function (data) {
-      const type = data && data.type
-      if (type === 'connected') {
-      } else if (type === 'done') {
-        setStatus('Sent ' + filename)
-        resolve('done')
-      } else {
-        console.log('unknown message', data)
-        setStatus('Unknown message ' + data)
-        reject(data)
-      }
-    })
-    conn.on('error', function (err) {
-      console.log('err', err)
-      setStatus(err)
-      reject(err)
-    })
-  })
 }
 
 function setStatus(status) {
