@@ -36,7 +36,6 @@ async function findFileInfo(blob, boundary) {
   const regex = /(?<=filename=")(.*)(?=")/g
   const matches = filePart.match(regex) || []
   const filename = decodeURI(matches[0])
-  console.log('DECVODE', filename, matches[0])
   if (!filename) {
     throw new Error('Could not find file in form data')
   }
