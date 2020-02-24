@@ -54,6 +54,8 @@ function reconnect() {
       conn.send({ type: 'connected', deviceName: name })
     })
     conn.on('data', (data) => {
+      const batch = data.batch
+      data = data.data
       console.log('data', data);
       // If enabled and is a string we copy to clipboard
       // TODO: this should be configured by the user at some point
@@ -64,32 +66,45 @@ function reconnect() {
         return
       }
 
-      // If it's a file we receive an ArrayBuffer here 
+      // If it's a file we receive an ArrayBuffer here
       if (data instanceof ArrayBuffer) {
         const path = require('path')
         const fs = require('fs')
 
-        const filename = conn.metadata.filename || 'unknown'
+        const batchSize = conn.metadata.batchSize
+        const fileSize = conn.metadata.fileSize
+        const filename = conn.metadata.filename
         const filepath = path.join(locationFolder(), filename)
         const filebuffer = new Buffer(data)
 
-        fs.writeFileSync(filepath, filebuffer)
-        conn.send({ type: 'done' })
-        console.log('Received ' + filepath)
-
-        // If enabled and is an image, write image to clipboard
-        if (COPY_FILE && isImage(filename)) {
-          clipboard.writeImage(
-            nativeImage.createFromPath(filepath)
-          )
+        if (batch === 0) {
+          fs.writeFileSync(filepath, filebuffer)
+        } else {
+          fs.appendFileSync(filepath, filebuffer)
         }
 
-        notifyFileSaved(filename, filepath)
-        return
+        conn.send({ type: 'done', batch })
+
+        if ((batch + 1) * batchSize >= fileSize) {
+          fileReceivedSuccessfully(filepath, filename)
+        }
       }
     })
   })
   previousPeer = peer
+}
+
+function fileReceivedSuccessfully(filepath, filename) {
+  console.log('Received ' + filepath)
+
+  // If enabled and is an image, write image to clipboard
+  if (COPY_FILE && isImage(filename)) {
+    clipboard.writeImage(
+      nativeImage.createFromPath(filepath)
+    )
+  }
+
+  notifyFileSaved(filename, filepath)
 }
 
 function notify(title, body, icon, opts = {}, cb) {
@@ -109,7 +124,7 @@ function notify(title, body, icon, opts = {}, cb) {
 
 
 function notifyCopy(data) {
-  const title = `Received Text from:  ${getConnectionId()}`
+  const title = `Received text from: ${getConnectionId()}`
   const body = data
   const image = `${__dirname}/trayIconTemplate@2x.png`
   notify(title, body, image)

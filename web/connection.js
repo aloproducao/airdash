@@ -34,23 +34,43 @@ export async function sendPayload(payload, meta, activeDevice, setStatus) {
     setStatus('Connecting...')
     console.log(`Sending ${meta} to ${connectionId}...`)
 
+    const totalSize = payload.size || 0
+    const batchSize = 1000000
+    let batch = 0
+
     const peer = new peerjs.Peer()
-    const conn = peer.connect(connectionId, { metadata: { filename: meta } })
+    const metadata = {
+      filename: meta,
+      batchSize,
+      fileSize: payload.size || -1
+    }
+    const conn = peer.connect(connectionId, { metadata })
     conn.on('open', async function () {
       clearTimeout(timeout)
-      setStatus('Sending...')
+      setStatus(`Sending...`)
       setTimeout(_ => {
         // conn.send blocks thread so wait one tick to let the
         // status change go through
-        conn.send(payload)
+        conn.send({ data: payload.slice(batch * batchSize, (batch + 1) * batchSize), batch })
+        batch++
       })
     })
     conn.on('data', async function (data) {
       const type = data && data.type
       if (type === 'connected') {
       } else if (type === 'done') {
-        setStatus('Sent ' + meta)
-        resolve('done')
+        if (batchSize * batch >= totalSize) {
+          setStatus('Sent ' + meta)
+          resolve('done')
+        } else {
+          setStatus(`Sending ${batch + 1}/${Math.ceil(totalSize / batchSize)} MB...`)
+          setTimeout(_ => {
+            // conn.send blocks thread so wait one tick to let the
+            // status change go through
+            conn.send({ data: payload.slice(batch * batchSize, (batch + 1) * batchSize), batch })
+            batch++
+          })
+        }
       } else {
         console.log('unknown message', data)
         setStatus('Unknown message ' + data)
