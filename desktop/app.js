@@ -1,11 +1,12 @@
 const { clipboard, nativeImage } = require('electron')
+const { getConnectionCode } = require('./connection')
 
 if (require('electron-is-dev')) {
   document.querySelector('#app-name').textContent = 'AirDash Dev'
 }
 
 document.querySelector('#location').value = locationFolder()
-document.querySelector('#connection-id').textContent = getConnectionId()
+document.querySelector('#connection-id').textContent = getConnectionCode()
 
 document.querySelector('#select-location').onclick = async () => {
   const { dialog } = require('electron').remote
@@ -28,23 +29,12 @@ const RAW_TEXT = true
 
 let previousPeer = null
 reconnect()
-if (!getConnectionId()) {
-  refreshDeviceId()
-}
-
-function refreshDeviceId() {
-  const num = () => Math.floor(Math.random() * 900) + 100
-  const newId = `${num()}-${num()}-${num()}`
-  localStorage.setItem('connection-id', newId)
-  document.querySelector('#connection-id').textContent = newId
-  reconnect()
-}
 
 function reconnect() {
   if (previousPeer) previousPeer.destroy()
-  const connectionId = `flownio-airdash-${getConnectionId()}`
-  const peer = new peerjs.Peer(connectionId)
-  console.log(`Listening on ${connectionId}...`)
+  const connectionCode = `flownio-airdash-${getConnectionCode()}`
+  const peer = new peerjs.Peer(connectionCode)
+  console.log(`Listening on ${connectionCode}...`)
   peer.on('connection', (conn) => {
     conn.on('open', () => {
       const hostname = require('os').hostname()
@@ -124,14 +114,14 @@ function notify(title, body, icon, opts = {}, cb) {
 
 
 function notifyCopy(data) {
-  const title = `Received text from: ${getConnectionId()}`
+  const title = `Received text`
   const body = data
   const image = `${__dirname}/trayIconTemplate@2x.png`
   notify(title, body, image)
 }
 
 function notifyFileSaved(filename, filepath) {
-  const title = `New File from:  ${getConnectionId()}`
+  const title = `New File`
   const body = `A new file has been saved, ${filename}`
   const image = `${__dirname}/trayIconTemplate@2x.png`
   notify(title, body, isImage(filename) ? filepath : image)
@@ -146,8 +136,4 @@ function locationFolder() {
   const os = require('os')
   const desktopPath = path.join(os.homedir(), 'Desktop')
   return localStorage.getItem('location') || desktopPath
-}
-
-function getConnectionId() {
-  return localStorage.getItem('connection-id') || ''
 }
