@@ -28,6 +28,7 @@
     "zip-desktop": "npm run dmg-desktop && zip -r -y dist/AirDash-Win32.zip dist/AirDash-win32-x64",
     "upload-desktop": "rsync -a -e 'ssh -p 3333' dist/AirDash.dmg simonb@flown.io:/var/www/flown.io/airdash --stats --progress && rsync -a -e 'ssh -p 3333' dist/airdash-win32.zip simonb@flown.io:/var/www/flown.io/airdash --stats --progress",
     "deploy-desktop": "npm run build-desktop && npm run zip-desktop && npm run upload-desktop",
+    "deploy-all": "npm run deploy-web && npm run deploy-desktop && npm version minor",
     "deploy-web": "rsync -a -e 'ssh -p 3333' web/ simonb@flown.io:/var/www/flown.io/airdash --stats --progress"
   }
 }
