@@ -1,5 +1,5 @@
 const { clipboard, nativeImage } = require('electron')
-const { getConnectionCode } = require('./connection')
+const { getConnectionCode, startReceivingService } = require('./connection')
 
 if (require('electron-is-dev')) {
   document.querySelector('#app-name').textContent = 'AirDash Dev'
@@ -20,69 +20,46 @@ document.querySelector('#select-location').onclick = async () => {
   }
 }
 
-// I add this "configs" here for now until some kind of user settings is in place 
+// I add this "configs" here for now until some kind of user settings is in place
 // Set to true to copy files to clipboard
 const COPY_FILE = true
-// Enable receiving raw text and automatically paste to clipboard
-const RAW_TEXT = true
 
+startReceivingService((data, conn) => {
+  const batch = data.batch
+  data = data.data
+  console.log('data', data);
 
-let previousPeer = null
-reconnect()
+  if (typeof data === 'string') {
+    clipboard.writeText(data)
+    conn.send({ type: 'done' })
+    notifyCopy(data)
+    return
+  }
 
-function reconnect() {
-  if (previousPeer) previousPeer.destroy()
-  const connectionCode = `flownio-airdash-${getConnectionCode()}`
-  const peer = new peerjs.Peer(connectionCode)
-  console.log(`Listening on ${connectionCode}...`)
-  peer.on('connection', (conn) => {
-    conn.on('open', () => {
-      const hostname = require('os').hostname()
-      const name = hostname
-        .replace(/\.local/g, '')
-        .replace(/-/g, ' ')
-      conn.send({ type: 'connected', deviceName: name })
-    })
-    conn.on('data', (data) => {
-      const batch = data.batch
-      data = data.data
-      console.log('data', data);
-      // If enabled and is a string we copy to clipboard
-      // TODO: this should be configured by the user at some point
-      if (RAW_TEXT && typeof data === 'string') {
-        clipboard.writeText(data)
-        conn.send({ type: 'done' })
-        notifyCopy(data)
-        return
-      }
+  // If it's a file we receive an ArrayBuffer here
+  if (data instanceof ArrayBuffer) {
+    const path = require('path')
+    const fs = require('fs')
 
-      // If it's a file we receive an ArrayBuffer here
-      if (data instanceof ArrayBuffer) {
-        const path = require('path')
-        const fs = require('fs')
+    const batchSize = conn.metadata.batchSize
+    const fileSize = conn.metadata.fileSize
+    const filename = conn.metadata.filename
+    const filepath = path.join(locationFolder(), filename)
+    const filebuffer = new Buffer(data)
 
-        const batchSize = conn.metadata.batchSize
-        const fileSize = conn.metadata.fileSize
-        const filename = conn.metadata.filename
-        const filepath = path.join(locationFolder(), filename)
-        const filebuffer = new Buffer(data)
+    if (batch === 0) {
+      fs.writeFileSync(filepath, filebuffer)
+    } else {
+      fs.appendFileSync(filepath, filebuffer)
+    }
 
-        if (batch === 0) {
-          fs.writeFileSync(filepath, filebuffer)
-        } else {
-          fs.appendFileSync(filepath, filebuffer)
-        }
+    conn.send({ type: 'done' })
 
-        conn.send({ type: 'done', batch })
-
-        if ((batch + 1) * batchSize >= fileSize) {
-          fileReceivedSuccessfully(filepath, filename)
-        }
-      }
-    })
-  })
-  previousPeer = peer
-}
+    if ((batch + 1) * batchSize >= fileSize) {
+      fileReceivedSuccessfully(filepath, filename)
+    }
+  }
+})
 
 function fileReceivedSuccessfully(filepath, filename) {
   console.log('Received ' + filepath)
