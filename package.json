@@ -1,5 +1,6 @@
 {
   "private": true,
+  "version": "0.1.0",
   "productName": "AirDash",
   "main": "./desktop/main.js",
   "dependencies": {
