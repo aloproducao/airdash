@@ -30,6 +30,6 @@ module.exports.startReceivingService = (callback) => {
     })
   })
   peer.on('error', (error) => {
-    console.error('Peer error', error)
+    console.error('Peer error', error.type, error)
   })
 }
