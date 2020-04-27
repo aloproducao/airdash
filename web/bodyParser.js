@@ -29,13 +29,15 @@ async function findFileInBody(bodyBlob, contentType) {
 async function findFileInfo(blob, boundary) {
   const decoder = new TextDecoder('utf-8')
   const { value } = await blob.stream().getReader().read()
-  let str = decoder.decode(value)
+  const str = decoder.decode(value)
   const parts = str.split(boundary + '\r\n')
 
   const filePart = parts.pop()
-  const regex = /(?<=filename=")(.*)(?=")/g
-  const matches = filePart.match(regex) || []
-  const filename = decodeURI(matches[0])
+  const search = 'filename="'
+  const start = filePart.indexOf(search) + search.length
+  const end = filePart.indexOf('"', start)
+  const encoded = filePart.substring(start, end)
+  const filename = decodeURI(encoded)
   if (!filename) {
     throw new Error('Could not find file in form data')
   }
