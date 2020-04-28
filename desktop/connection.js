@@ -14,10 +14,19 @@ module.exports.getConnectionCode = () => {
   return id
 }
 
+let peer
 module.exports.startReceivingService = (callback) => {
+  connect(callback)
+  setInterval(() => {
+    peer.disconnect()
+    connect(callback)
+  }, 30 * 1000)
+}
+
+function connect(callback) {
   const connectionCode = `flownio-airdash-${getConnectionCode()}`
-  const peer = new peerjs.Peer(connectionCode)
-  console.log(`Listening on ${connectionCode}...`)
+  peer = new peerjs.Peer(connectionCode)
+  console.log(`Listening on ${connectionCode} ${new Date().toTimeString().substr(0, 8)}...`)
   peer.on('connection', (conn) => {
     conn.on('open', () => {
       conn.send({ type: 'connected', deviceName })

@@ -27,7 +27,6 @@ const COPY_FILE = true
 startReceivingService((data, conn) => {
   const batch = data.batch
   data = data.data
-  console.log('data', data);
 
   if (typeof data === 'string') {
     clipboard.writeText(data)
