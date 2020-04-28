@@ -20,7 +20,7 @@ module.exports.startReceivingService = (callback) => {
   setInterval(() => {
     peer.disconnect()
     connect(callback)
-  }, 30 * 1000)
+  }, 10 * 60 * 1000)
 }
 
 function connect(callback) {
