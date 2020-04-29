@@ -28,13 +28,16 @@ module.exports.startReceivingService = (callback) => {
       callback(data, conn)
     })
     conn.on('error', (error) => {
-      console.error('Connection error', error)
+      const time = new Date().toTimeString().substr(0, 8)
+      console.error(`Connection error ${time}`, error.type, error.message)
     })
   })
   peer.on('error', (error) => {
     const time = new Date().toTimeString().substr(0, 8)
-    console.error(`Peer error ${time}`, error.type, error)
+    console.error(`Peer error ${time}`, error.type, error.message)
     peer.destroy()
-    module.exports.startReceivingService(callback)
+    setTimeout(() => {
+      module.exports.startReceivingService(callback)
+    }, 100)
   })
 }
