@@ -20,7 +20,7 @@ module.exports.startReceivingService = (callback) => {
   setInterval(() => {
     peer.disconnect()
     connect(callback)
-  }, 10 * 60 * 1000)
+  }, 5 * 60 * 1000)
 }
 
 function connect(callback) {
@@ -39,6 +39,6 @@ function connect(callback) {
     })
   })
   peer.on('error', (error) => {
-    console.error('Peer error', error.type, error)
+    console.error(`Peer error ${new Date().toTimeString().substr(0, 8)}`, error.type, error)
   })
 }
