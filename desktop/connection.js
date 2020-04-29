@@ -16,17 +16,10 @@ module.exports.getConnectionCode = () => {
 
 let peer
 module.exports.startReceivingService = (callback) => {
-  connect(callback)
-  setInterval(() => {
-    peer.disconnect()
-    connect(callback)
-  }, 5 * 60 * 1000)
-}
-
-function connect(callback) {
   const connectionCode = `flownio-airdash-${getConnectionCode()}`
   peer = new peerjs.Peer(connectionCode)
-  console.log(`Listening on ${connectionCode} ${new Date().toTimeString().substr(0, 8)}...`)
+  const time = new Date().toTimeString().substr(0, 8)
+  console.log(`Listening on ${connectionCode} ${time}...`)
   peer.on('connection', (conn) => {
     conn.on('open', () => {
       conn.send({ type: 'connected', deviceName })
@@ -39,6 +32,9 @@ function connect(callback) {
     })
   })
   peer.on('error', (error) => {
-    console.error(`Peer error ${new Date().toTimeString().substr(0, 8)}`, error.type, error)
+    const time = new Date().toTimeString().substr(0, 8)
+    console.error(`Peer error ${time}`, error.type, error)
+    peer.destroy()
+    module.exports.startReceivingService(callback)
   })
 }
