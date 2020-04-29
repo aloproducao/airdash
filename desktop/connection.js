@@ -38,6 +38,6 @@ module.exports.startReceivingService = (callback) => {
     peer.destroy()
     setTimeout(() => {
       module.exports.startReceivingService(callback)
-    }, 100)
+    }, 1000)
   })
 }
