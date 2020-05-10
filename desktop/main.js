@@ -15,6 +15,10 @@ const mb = menubar({
   }
 });
 
+mb.on('after-show', () => {
+  mb.window.webContents.send('after-show', null)
+})
+
 mb.on('ready', () => {
   console.log('App is ready')
 

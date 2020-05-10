@@ -1,5 +1,7 @@
-const { clipboard, nativeImage } = require('electron')
+const { clipboard, nativeImage, ipcRenderer } = require('electron')
 const { getConnectionCode, startReceivingService } = require('./connection')
+
+const primaryColor = '#25AE88'
 
 if (require('electron-is-dev')) {
   document.querySelector('#app-name').textContent = 'AirDash Dev'
@@ -24,7 +26,11 @@ document.querySelector('#select-location').onclick = async () => {
 // Set to true to copy files to clipboard
 const COPY_FILE = true
 
-startReceivingService((data, conn) => {
+ipcRenderer.on('after-show', (event, message) => {
+  startReceivingService(dataReceived, setStatus);
+})
+
+function dataReceived(data, conn) {
   const batch = data.batch
   data = data.data
 
@@ -56,12 +62,19 @@ startReceivingService((data, conn) => {
 
     if ((batch + 1) * batchSize >= fileSize) {
       fileReceivedSuccessfully(filepath, filename)
+      setStatus(primaryColor, 'File received')
+      setTimeout(() => {
+        setStatus(primaryColor, 'Ready to receive files')
+      }, 3000)
+    } else {
+      setStatus(primaryColor, `Receiving file ${batch}/${Math.round(fileSize / batchSize)} MB...`)
     }
   }
-})
+}
 
 function fileReceivedSuccessfully(filepath, filename) {
   console.log('Received ' + filepath)
+  setStatus(primaryColor, 'File received')
 
   // If enabled and is an image, write image to clipboard
   if (COPY_FILE && isImage(filename)) {
@@ -113,3 +126,12 @@ function locationFolder() {
   const desktopPath = path.join(os.homedir(), 'Desktop')
   return localStorage.getItem('location') || desktopPath
 }
+
+function setStatus(color, status) {
+  let $message = document.querySelector('#status-message')
+  let $indicator = document.querySelector('#status-indicator')
+  $indicator.style.background = color
+  $message.textContent = status
+}
+
+
