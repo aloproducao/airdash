@@ -15,7 +15,26 @@ let showAddButton = true;
   }
 
   render()
+  await connectToDevices()
 })()
+
+const deviceStatuses = {}
+
+async function connectToDevices() {
+  const devices = getDevices()
+  for (const [id, device] of Object.entries(devices)) {
+    try {
+      deviceStatuses[id] = { color: '#f1c40f', message: 'Connecting'}
+      render()
+      await tryConnection(id)
+      deviceStatuses[id] = { color: primaryColor, message: 'Ready'}
+      render()
+    } catch (err) {
+      deviceStatuses[id] = { color: '#e74c3c', message: 'Could not connect'}
+      render()
+    }
+  }
+}
 
 async function swMessageReceived(event) {
   console.log('Message received')
@@ -38,11 +57,13 @@ function render() {
   if (!devices[activeDevice]) {
     activeDevice = Object.keys(devices)[0]
   }
+  const deviceRows = Object
+    .entries(devices)
+    .map(([id, obj]) => renderDeviceRow(id, obj, id === activeDevice))
+    .join('')
   const content = `
     <section>
-        <form>
-            ${Object.entries(devices).map(([id, obj], i) => renderDeviceRow(id, obj, id === activeDevice)).join('')}
-        </form>
+        <form>${deviceRows}</form>
         <div style="clear:both;"></div>
         <div style="margin: 10px 0;">${renderAddDevice()}</div>
     </section>
@@ -69,20 +90,22 @@ function renderAddDevice() {
   }
 }
 
-function renderDeviceRow(id, device, checked) {
+function renderDeviceRow(code, device, checked) {
+  const status = deviceStatuses[code] || {}
   return `
     <div class="device" style="background: none; cursor: pointer;">
         <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" style="padding-right: 15px;">
-            <input class="device-radio" type="radio" id="${id}" name="device" value="${id}" ${checked ? 'checked' : ''}>
+            <input class="device-radio" type="radio" id="${code}" name="device" value="${code}" ${checked ? 'checked' : ''}>
         </label>
         <div style="display: inline-block; padding: 10px; vertical-align: middle;">
             <div style="font-size: 18px">${device.name}</div>
             <div style="font-size: 14px; color: #555;">
-                <span class="device-status-indicator" style="border-radius: 10px; width: 10px; height: 10px; background: ${primaryColor}; margin-right: 5px; display: inline-block"></span> 
-                <span class="device-status">${id}</span>
+                <span class="device-status-indicator" style="border-radius: 10px; width: 10px; height: 10px; background: ${status.color || '#e74c3c'}; margin-right: 5px; display: inline-block"></span> 
+                <span class="device-status">${status.message || 'Unknown error'}</span> -
+                <span class="device-status">${code}</span>
             </div>
         </div>
-        <div class="remove-device-btn" style="cursor: pointer; background: none; border: 0; padding: 14px; outline: none; color: #aaa; float: right;" data-device-id="${id}">
+        <div class="remove-device-btn" style="cursor: pointer; background: none; border: 0; padding: 14px; outline: none; color: #aaa; float: right;" data-device-id="${code}">
             <i class="material-icons">close</i>
         </div>
     </div>
