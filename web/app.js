@@ -23,16 +23,15 @@ const deviceStatuses = {}
 async function connectToDevices() {
   const devices = getDevices()
   for (const [id, device] of Object.entries(devices)) {
-    try {
-      deviceStatuses[id] = { color: '#f1c40f', message: 'Connecting'}
-      render()
-      await tryConnection(id)
+    deviceStatuses[id] = { color: '#f1c40f', message: 'Connecting'}
+    render()
+    tryConnection(id).then(() => {
       deviceStatuses[id] = { color: primaryColor, message: 'Ready'}
-      render()
-    } catch (err) {
+    }).catch(err => {
       deviceStatuses[id] = { color: '#e74c3c', message: 'Could not connect'}
+    }).then(() => {
       render()
-    }
+    })
   }
 }
 
@@ -203,6 +202,7 @@ async function tryAddingDevice(code, element) {
   try {
     const result = await tryConnection(code)
     addDevice(code, result.deviceName || code)
+    deviceStatuses[code] = {color: primaryColor, message: 'Ready'}
     setActiveDevice(code)
     showAddButton = true
     render()

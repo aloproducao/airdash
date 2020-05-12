@@ -29,6 +29,7 @@ const COPY_FILE = true
 ipcRenderer.on('after-show', (event, message) => {
   startReceivingService(dataReceived, setStatus);
 })
+startReceivingService(dataReceived, setStatus);
 
 function dataReceived(data, conn) {
   const batch = data.batch
