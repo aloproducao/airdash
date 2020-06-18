@@ -18,6 +18,10 @@ The web app is built as a [PWA](https://developers.google.com/web/progressive-we
 
 The desktop app is built with [electronjs](https://www.electronjs.org).
 
+#### Web architecture
+
+Page load: index.html -> app.js -> registers sw.js service worker
+
 ## Deploy and build
 
 - `npm run deploy-web`

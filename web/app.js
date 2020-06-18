@@ -28,6 +28,7 @@ async function connectToDevices() {
     tryConnection(id).then(() => {
       deviceStatuses[id] = { color: primaryColor, message: 'Ready'}
     }).catch(err => {
+      console.error(err)
       deviceStatuses[id] = { color: '#e74c3c', message: 'Could not connect'}
     }).then(() => {
       render()
