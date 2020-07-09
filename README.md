@@ -1,6 +1,6 @@
 # AirDash
 
-Transfer photos and files anywhere. Discuss project on [FindCollab](https://findcollabs.com/project/7BK81zF3mZTpT0jjQ2hQ)
+Transfer photos and files anywhere. Discuss project on [FindCollab](https://findcollabs.com/project/7BK81zF3mZTpT0jjQ2hQ) or join us on [Telegram](https://t.me/joinchat/LlpnuhhuO8HVYP1TzHwLsg).
 
 <img alt="AirDash" src="https://raw.githubusercontent.com/simonbengtsson/airdash/master/promo.png" height="200" />
 
