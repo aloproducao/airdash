@@ -26,8 +26,8 @@ export async function tryConnection(deviceCode) {
 function getPeerjs() {
   const options = useCustomPeerJsServer ? {
     host: 'peerjs.flown.io',
-    port: 80,
     path: '/myapp',
+    secure: true
   } : null
   return new peerjs.Peer(options)
 }

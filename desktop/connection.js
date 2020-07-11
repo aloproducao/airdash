@@ -30,8 +30,8 @@ module.exports.startReceivingService = (callback, setStatus) => {
   if (peer) peer.destroy()
   const options = useCustomPeerJsServer ? {
     host: 'peerjs.flown.io',
-    port: 80,
     path: '/myapp',
+    secure: true
   } : null
   peer = new peerjs.Peer(connectionCode, options)
   const time = new Date().toTimeString().substr(0, 8)
