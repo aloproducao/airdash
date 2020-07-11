@@ -1,6 +1,7 @@
 /** @external peerjs */
 
 const primaryColor = '#25AE88'
+const useCustomPeerJsServer = true
 
 const deviceName = require('os').hostname()
   .replace(/\.local/g, '')
@@ -27,7 +28,12 @@ module.exports.startReceivingService = (callback, setStatus) => {
   console.log('Will connect...')
   const connectionCode = `flownio-airdash-${getConnectionCode()}`
   if (peer) peer.destroy()
-  peer = new peerjs.Peer(connectionCode)
+  const options = useCustomPeerJsServer ? {
+    host: 'peerjs.flown.io',
+    port: 80,
+    path: '/myapp',
+  } : null
+  peer = new peerjs.Peer(connectionCode, options)
   const time = new Date().toTimeString().substr(0, 8)
   console.log(`Listening on ${connectionCode} ${time}...`)
   setStatus('#f1c40f', 'Connecting...')

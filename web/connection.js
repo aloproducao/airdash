@@ -1,3 +1,4 @@
+const useCustomPeerJsServer = true
 
 export async function tryConnection(deviceCode) {
   return new Promise((resolve, reject) => {
@@ -5,7 +6,7 @@ export async function tryConnection(deviceCode) {
       reject('Connection timed out. Make sure the device code is correct and try again.')
     }, 5000)
 
-    const peer = new peerjs.Peer()
+    const peer = getPeerjs()
     const connectionId = `flownio-airdash-${deviceCode}`
     const conn = peer.connect(connectionId)
     conn.on('open', async function () {
@@ -20,6 +21,15 @@ export async function tryConnection(deviceCode) {
       reject(err)
     })
   })
+}
+
+function getPeerjs() {
+  const options = useCustomPeerJsServer ? {
+    host: 'peerjs.flown.io',
+    port: 80,
+    path: '/myapp',
+  } : null
+  return new peerjs.Peer(options)
 }
 
 export async function sendPayload(payload, meta, activeDevice, setStatus) {
@@ -38,7 +48,7 @@ export async function sendPayload(payload, meta, activeDevice, setStatus) {
     const batchSize = 1000000
     let batch = 0
 
-    const peer = new peerjs.Peer()
+    const peer = getPeerjs()
     const metadata = {
       filename: meta,
       batchSize,
