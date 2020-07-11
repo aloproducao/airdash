@@ -8,6 +8,7 @@ const mb = menubar({
   preloadWindow: true,
   browserWindow: {
     webPreferences: {
+      enableRemoteModule: true,
       nodeIntegration: true
     },
     width: 450,
