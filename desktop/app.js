@@ -86,7 +86,6 @@ function fileReceivedSuccessfully(filepath, filename) {
   }
 
   notifyFileSaved(filename, filepath)
-  addFileToHistory(filename, filepath, new Date());
 }
 
 function isImage(filename) {
