@@ -35,4 +35,4 @@ mb.on('ready', () => {
   if (isDev) mb.window.openDevTools()
 })
 
-app.setLoginItemSettings({ openAtLogin: true, openAsHidden: true })
+app.setLoginItemSettings({ openAtLogin: !isDev, openAsHidden: true })
