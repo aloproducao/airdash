@@ -29,6 +29,7 @@
     "upload-desktop": "rsync -a dist/AirDash.dmg root@flown.io:/var/www/flown.io/airdash --stats --progress && rsync -a dist/airdash-win32.zip root@flown.io:/var/www/flown.io/airdash --stats --progress",
     "deploy-desktop": "npm run build-desktop && npm run zip-desktop && npm run upload-desktop",
     "deploy-all": "npm run deploy-web && npm run deploy-desktop && npm version minor",
-    "deploy-web": "rsync -a web/ root@flown.io:/var/www/flown.io/airdash --stats --progress"
+    "deploy-web": "rsync -a web/ root@flown.io:/var/www/flown.io/airdash --stats --progress",
+    "ncu": "npx npm-check-updates -u"
   }
 }
