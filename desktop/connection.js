@@ -24,24 +24,32 @@ module.exports.startReceivingService = (callback, setStatus) => {
     setStatus(primaryColor, 'Ready to receive files')
     return
   }
+  
   setStatus('#f1c40f', 'Connecting...')
   console.log('Will connect...')
+  
   const connectionCode = `flownio-airdash-${getConnectionCode()}`
+  
   if (peer) peer.destroy()
+  
   const options = useCustomPeerJsServer ? {
     host: 'peerjs.flown.io',
     path: '/myapp',
     secure: true
   } : null
+  
   peer = new peerjs.Peer(connectionCode, options)
   const time = new Date().toTimeString().substr(0, 8)
+  
   console.log(`Listening on ${connectionCode} ${time}...`)
   setStatus('#f1c40f', 'Connecting...')
+  
   peer.on('open', () => {
     setTimeout(() => {
       setStatus(primaryColor, 'Ready to receive files')
     }, 1000)
   })
+
   peer.on('connection', (conn) => {
     conn.on('open', () => {
       conn.send({ type: 'connected', deviceName })
@@ -54,6 +62,7 @@ module.exports.startReceivingService = (callback, setStatus) => {
       console.error(`Connection error ${time}`, error.type, error.message)
     })
   })
+
   peer.on('error', (error) => {
     const time = new Date().toTimeString().substr(0, 8)
     console.error(`Peer error ${time} dis: ${peer.disconnected} des: ${peer.destroyed}`, error.type, error.message)

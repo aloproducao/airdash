@@ -70,6 +70,7 @@ export async function sendPayload(payload, meta, activeDevice, setStatus) {
       if (type === 'connected') {
       } else if (type === 'done') {
         if (batchSize * batch >= totalSize) {
+          // Sending finished
           setStatus('Sent ' + meta)
           resolve('done')
         } else {
