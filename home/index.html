@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="logo.png"/>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <title>AirDash</title>
+    <style>
+        html {
+            box-sizing: border-box;
+        }
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        * {
+            font-family: "Helvetica", sans-serif;
+        }
+
+        .header-separator {
+            width: 50px;
+            height: 5px;
+            background: #25AE88;
+        }
+
+        .main-button {
+            background: #eee;
+            text-decoration: none;
+            color: #000;
+            padding: 15px 30px;
+            border-radius: 100px;
+            white-space: nowrap;
+        }
+
+        .platform-button {
+            padding: 10px;
+            text-decoration: none;
+        }
+
+        .promo-box {
+            padding: 40px;
+            width: 100%;
+            float: left;
+        }
+
+        .collaborator {
+            font-weight: bold;
+        }
+
+        .body {
+            color: #888;
+            line-height: 1.4;
+            font-size: 16px;
+        }
+
+        @media only screen and (min-width: 800px) {
+            .promo-box {
+                max-width: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<section style="max-width: 500px; margin: 0 auto; text-align: center; padding: 40px;">
+    <div style="font-size: 24px;">
+        <img style="width: 35px; vertical-align: middle" src="logo.png" alt="Logo">
+        <div style="display: inline-block; vertical-align: middle;">AirDash</div>
+    </div>
+
+    <h1>Transfer photos and files anywhere</h1>
+    <p class="body">Send picture from android to mac? Large file over 2gb from pc to pc? AirDash handles it all securely and
+        free.</p>
+
+    <img style="width: 80%; margin-bottom: 20px;" alt="Promo" src="promo.png">
+
+    <div>
+        <a class="main-button" style="background: #25AE88; color: #fff;" href="#download">🍎 Get Mac App</a>
+        <a class="main-button" href="#open">Send files online</a>
+    </div>
+    <br>
+    <br>
+    <div>
+        <a class="platform-button" href="#windows">🏠</a>
+        <a class="platform-button" href="#mac">🍎</a>
+        <a class="platform-button" href="#android">🤖</a>
+    </div>
+
+</section>
+<hr style=" background-color: #ccc; height: 1px; border: 0;">
+<section style="max-width: 800px; margin: 0 auto;">
+    <div class="promo-box">
+        <h2>Android to Mac to PC to iPhone</h2>
+        <div class="header-separator"></div>
+        <p class="body">Send photo from android to mac? Tranfer files from mac to pc? Import pictures to mac from iphone? You name it, Airdash supports it.</p>
+    </div>
+    <div class="promo-box">
+        <h2>Max privacy, security and speed</h2>
+        <div class="header-separator"></div>
+        <p class="body">Once a connection is established files are transferred directly between devices using WebRTC. Maxiumum privacy, security and speed.</p>
+    </div>
+    <div class="promo-box">
+        <h2>Send LARGE files</h2>
+        <div class="header-separator"></div>
+        <p class="body">File over 2gb? No problem. AirDash connects directly between devices enbling unlimited free transfer of large files.</p>
+    </div>
+    <div class="promo-box">
+        <h2>AirDrop for Android</h2>
+        <div class="header-separator"></div>
+        <p class="body">By installing the Android app you can send files from the android share menu. If you are sharing to a computer it’s only one click to transfer a file.</p>
+    </div>
+    <div style="clear: both;"></div>
+</section>
+<hr style=" background-color: #ccc; height: 1px; border: 0;">
+<footer>
+    <div style="padding: 40px; max-width: 800px; margin: 0 auto;">
+        <div style="float: left;">
+            <div>Made by</div>
+            <div class="collaborator">Simon Bengtsson</div>
+            <div class="collaborator">Manolo Edge</div>
+        </div>
+
+        <iframe style="float: right;" src="https://ghbtns.com/github-btn.html?user=twbs&repo=bootstrap&type=star&count=true&size=large"
+                frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe>
+        <div style="clear: both;"></div>
+    </div>
+</footer>
+
+</body>
+</html>
