@@ -75,6 +75,7 @@ function render() {
             <!-- bodyParser.js requires that the file input is the last element -->
             <input id="file-input" name="file" type="file" style="opacity: 0; position: absolute; z-index: -1">
         </form>
+        <p style="color: #aaa; text-align: center; margin-top: 50px;">v0.2.0</p>
     </section>
   `
   document.querySelector('#content').innerHTML = content
