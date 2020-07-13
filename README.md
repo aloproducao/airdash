@@ -45,7 +45,7 @@ Page load: index.html -> app.js -> registers sw.js service worker
 
 ## PeerJS Server
 
-Uses a custom peerjs server setup at peerjs.flown.io. Its setup with the default suggested "docker run -p 9000:9000 -d peerjs/peerjs-server" together with nginx. 
+Uses a custom peerjs server setup at peerjs.flown.io. Its setup with the default suggested `docker run -p 9000:9000 -d peerjs/peerjs-server` together with nginx. 
 
 ## Contributing
 Pull requests are welcome an appreciated. To see features and improvements in development you can check out the following links:
