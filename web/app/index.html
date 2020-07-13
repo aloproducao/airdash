@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="manifest" href="/manifest.json"/>
+    <link rel="apple-touch-icon" href="/logo.png">
+    <link rel="icon" type="image/png" href="/logo.png"/>
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css" rel="stylesheet">
+    <link rel="shortcut icon" href="/logo.png" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>AirDash</title>
+
+    <style>
+        * {
+            font-family: Roboto, sans-serif;
+        }
+
+        a, a:visited {
+            color: #25AE88;
+            font-weight: bolder;
+            text-decoration: none;
+        }
+
+        li {
+            padding-bottom: 5px;
+        }
+
+        a:hover {
+            border-bottom: solid 2px #25AE88;
+        }
+
+        section {
+            padding-left: 30px;
+            padding-right: 30px;
+            max-width: 500px;
+            margin: 30px auto;
+        }
+
+        #file-button {
+            background: #25AE88;
+            width: 100%;
+            display: block;
+            border-radius: 100px;
+            text-align: center;
+            line-height: 40px;
+            color: white;
+        }
+
+        #code-input {
+            outline: none;
+            border-radius: 3px;
+            padding: 8px;
+            font-size: 16px;
+            margin-right: 5px;
+            border: solid #ccc 1px;
+        }
+
+        #code-input:disabled {
+            background: #ededed;
+        }
+    </style>
+</head>
+<body>
+
+<section style="margin-top: 30px;">
+    <img src="/logo.png" style="width: 35px;  float: left;">
+    <h1 style="font-size: 20px; float: left; line-height: 35px; padding-left: 10px; margin: 0">
+        AirDash
+    </h1>
+    <div style="clear: both;"></div>
+</section>
+<section>
+    <p>Share photos, documents and other files from <a href="/app" target="_blank">Web</a> and <a href="#" id="android-install">Android</a> to <a href="/AirDash-Win32.zip">Windows</a> and <a href="/AirDash.dmg">Mac</a>.</p>
+</section>
+
+<div id="content"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.5.3/cleave.js"></script>
+<script src="https://unpkg.com/localforage@1.7.3/dist/localforage.js"></script>
+<script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
+<script src="app.js" type="module"></script>
+</body>
+</html>

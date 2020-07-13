@@ -21,16 +21,16 @@
     "singleQuote": true
   },
   "scripts": {
-    "start": "electron . --dev",
-    "start-web": "live-server . --open=/web",
-    "start-home": "live-server . --open=/home",
+    "start": "npm run start-desktop",
+    "start-desktop": "electron . --dev",
+    "start-web": "live-server web --open",
+    "ncu": "npx npm-check-updates -u",
     "build-desktop": "npx electron-packager . --overwrite --icon=desktop/logo.icns --platform=darwin,win32 --arch=x64 --out=dist --code-sign=true --osx-sign.identity='5A724B81727D91F5AD445C132BD142840A58F8C9' --osx-sign.type=distribution",
     "dmg-desktop": "electron-installer-dmg dist/AirDash-darwin-x64/AirDash.app AirDash --out=dist --icon=desktop/logo.icns --overwrite",
     "zip-desktop": "npm run dmg-desktop && zip -r -y dist/AirDash-Win32.zip dist/AirDash-win32-x64",
-    "upload-desktop": "rsync -a dist/AirDash.dmg root@flown.io:/var/www/flown.io/airdash --stats --progress && rsync -a dist/airdash-win32.zip root@flown.io:/var/www/flown.io/airdash --stats --progress",
+    "upload-desktop": "rsync -a dist/AirDash.dmg root@flown.io:/var/www/airdash/home --stats --progress && rsync -a dist/airdash-win32.zip root@flown.io:/var/www/airdash/home --stats --progress",
     "deploy-desktop": "npm run build-desktop && npm run zip-desktop && npm run upload-desktop",
-    "deploy-all": "npm run deploy-web && npm run deploy-desktop && npm version minor",
-    "deploy-web": "rsync -a web/ root@flown.io:/var/www/flown.io/airdash --stats --progress",
-    "ncu": "npx npm-check-updates -u"
+    "deploy-web": "rsync -a web/ root@flown.io:/var/www/airdash --stats --progress ",
+    "deploy-all": "npm run deploy-web && npm run deploy-desktop && npm run deploy-home"
   }
 }
