@@ -130,7 +130,7 @@ function attachDocument() {
       // makes it easier to debug the service worker used for handling files from
       // the Android share menu
       console.log('File picked', element.files[0].name)
-      ga('filePicked', 'event');
+      gtag('filePicked', 'event');
       document.querySelector('#file-form').submit()
       setStatus('Preparing...')
     })
