@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google Analytics start -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-34855982-15"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-34855982-15');
+    </script>
+    <!-- Google Analytics end -->
+
     <meta charset="UTF-8">
     <link rel="manifest" href="/manifest.json"/>
     <link rel="apple-touch-icon" href="./logo.png">
@@ -221,12 +231,16 @@
       }
 
       btnElem.onclick = () => {
+        ga('downloadClicked', 'event');
         if (isMac) {
           window.location.href = '/airdash.dmg'
+          ga('downloadClickedMac', 'event');
         } else if (isWindows) {
           window.location.href = '/airdash-win32.zip'
+          ga('downloadClickedWindows', 'event');
         } else {
           displayInstallPrompt()
+          ga('downloadClickedOther', 'event');
         }
       }
     }
@@ -240,12 +254,15 @@
   })
 
   async function displayInstallPrompt() {
+    ga('displayInstallPrompt', 'event');
+
     console.log('Display install prompt')
     deferredPrompt.prompt()
     const choice = await deferredPrompt.userChoice
     console.log(choice, deferredPrompt)
     if (choice.outcome === 'accepted') {
       window.location.href = '/app'
+      ga('appInstalled', 'event');
     }
   }
 </script>
