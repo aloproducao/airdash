@@ -1,14 +1,16 @@
-# AirDash
+<div align="center">
+  <img width="50" height="50" src="desktop/logo.png" alt="Logo">
+  <h1>AirDash</h1>
+  
+  <h3>Transfer photos and files anywhere</h3>
+  <p class="body">Send picture from android to mac? Large file over 2gb from pc to pc? AirDash handles it all
+        securely and free.</p>
+        
+  <img width="400" alt="Promo" src="promo.png">
 
-Transfer photos and files anywhere.
+</div>
 
-
-- [Website](https://www.flown.io/airdash)
-- [Figma design](https://www.figma.com/file/NNbayrhqc3h5hW0nniUOyS/AirDash)
-- [Telegram](https://t.me/joinchat/LlpnuhhuO8HVYP1TzHwLsg)
-
-
-<img alt="AirDash" src="https://raw.githubusercontent.com/simonbengtsson/airdash/master/promo.png" height="200" />
+****
 
 ## Getting Started
 
