@@ -13,10 +13,9 @@
   
   <p>Download for</p>
   
-  <img src="https://img.shields.io/badge/-Android-3DDC84?style=for-the-badge&logo=android&logoColor=ffffff"/>
-  <img src="https://img.shields.io/badge/-iOS-007aff?style=for-the-badge&logo=ios&logoColor=ffffff"/>
-  <img src="https://img.shields.io/badge/-MacOS-007aff?style=for-the-badge&logo=apple&logoColor=ffffff"/>
-  <img src="https://img.shields.io/badge/-Windows-00adef?style=for-the-badge&logo=windows&logoColor=ffffff"/>
+  <a href="https://airdash.flown.io/#android"><img src="https://img.shields.io/badge/-Android-3DDC84?style=for-the-badge&logo=android&logoColor=ffffff"/></a>
+  <a href="https://airdash.flown.io/AirDash.dmg"><img src="https://img.shields.io/badge/-MacOS-007aff?style=for-the-badge&logo=apple&logoColor=ffffff"/></a>
+  <a href="https://airdash.flown.io/AirDash-Win32.zip"><img src="https://img.shields.io/badge/-Windows-00adef?style=for-the-badge&logo=windows&logoColor=ffffff"/></a>
 </div>
 
 ****
