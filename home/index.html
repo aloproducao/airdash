@@ -11,9 +11,11 @@
         html {
             box-sizing: border-box;
         }
+
         *, *:before, *:after {
             box-sizing: inherit;
         }
+
         * {
             font-family: "Helvetica", sans-serif;
         }
@@ -28,14 +30,32 @@
             background: #eee;
             text-decoration: none;
             color: #000;
-            padding: 15px 30px;
+            padding: 0 30px;
             border-radius: 100px;
+            display: inline-block;
             white-space: nowrap;
+        }
+
+        .main-button-text {
+            padding: 15px 0;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .main-button-icon {
+            font-size: 24px;
+            vertical-align: middle;
+            padding: 15px 0;
+            display: inline-block;
         }
 
         .platform-button {
             padding: 10px;
             text-decoration: none;
+        }
+
+        .platform-button ion-icon {
+            font-size: 20px;
         }
 
         .promo-box {
@@ -45,6 +65,9 @@
         }
 
         .collaborator {
+            text-decoration: none;
+            display: block;
+            color: #000;
             font-weight: bold;
         }
 
@@ -70,21 +93,32 @@
     </div>
 
     <h1>Transfer photos and files anywhere</h1>
-    <p class="body">Send picture from android to mac? Large file over 2gb from pc to pc? AirDash handles it all securely and
-        free.</p>
+    <p class="body">Send picture from android to mac? Large file over 2gb from pc to pc? AirDash handles it all
+        securely and free.</p>
 
     <img style="width: 80%; margin-bottom: 20px;" alt="Promo" src="promo.png">
 
     <div>
-        <a class="main-button" style="background: #25AE88; color: #fff;" href="#download">🍎 Get Mac App</a>
-        <a class="main-button" href="#open">Send files online</a>
+        <a class="main-button" style="background: #25AE88; color: #fff;" href="#download">
+            <ion-icon class="main-button-icon" style="position: relative; top: -2px;" name="logo-apple"></ion-icon>
+            <div class="main-button-text">Get Mac App</div>
+        </a>
+        <a class="main-button" href="#open">
+            <div class="main-button-text">Send files online</div>
+        </a>
     </div>
     <br>
     <br>
     <div>
-        <a class="platform-button" href="#windows">🏠</a>
-        <a class="platform-button" href="#mac">🍎</a>
-        <a class="platform-button" href="#android">🤖</a>
+        <a style="color: #00A4EF" class="platform-button" href="#windows">
+            <ion-icon name="logo-windows"></ion-icon>
+        </a>
+        <a style="color: #000" class="platform-button" href="#mac">
+            <ion-icon name="logo-apple"></ion-icon>
+        </a>
+        <a style="color: #3DDC84" class="platform-button" href="#android">
+            <ion-icon name="logo-android"></ion-icon>
+        </a>
     </div>
 
 </section>
@@ -93,22 +127,26 @@
     <div class="promo-box">
         <h2>Android to Mac to PC to iPhone</h2>
         <div class="header-separator"></div>
-        <p class="body">Send photo from android to mac? Tranfer files from mac to pc? Import pictures to mac from iphone? You name it, Airdash supports it.</p>
+        <p class="body">Send photo from android to mac? Tranfer files from mac to pc? Import pictures to mac from
+            iphone? You name it, Airdash supports it.</p>
     </div>
     <div class="promo-box">
         <h2>Max privacy, security and speed</h2>
         <div class="header-separator"></div>
-        <p class="body">Once a connection is established files are transferred directly between devices using WebRTC. Maxiumum privacy, security and speed.</p>
+        <p class="body">Once a connection is established files are transferred directly between devices using WebRTC.
+            Maxiumum privacy, security and speed.</p>
     </div>
     <div class="promo-box">
         <h2>Send LARGE files</h2>
         <div class="header-separator"></div>
-        <p class="body">File over 2gb? No problem. AirDash connects directly between devices enbling unlimited free transfer of large files.</p>
+        <p class="body">File over 2gb? No problem. AirDash connects directly between devices enbling unlimited free
+            transfer of large files.</p>
     </div>
     <div class="promo-box">
         <h2>AirDrop for Android</h2>
         <div class="header-separator"></div>
-        <p class="body">By installing the Android app you can send files from the android share menu. If you are sharing to a computer it’s only one click to transfer a file.</p>
+        <p class="body">By installing the Android app you can send files from the android share menu. If you are sharing
+            to a computer it’s only one click to transfer a file.</p>
     </div>
     <div style="clear: both;"></div>
 </section>
@@ -116,16 +154,19 @@
 <footer>
     <div style="padding: 40px; max-width: 800px; margin: 0 auto;">
         <div style="float: left;">
-            <div>Made by</div>
-            <div class="collaborator">Simon Bengtsson</div>
-            <div class="collaborator">Manolo Edge</div>
+            <div class="body">Made by</div>
+            <a class="collaborator" href="https://simonbengtsson.com">Simon Bengtsson</a>
+            <a class="collaborator" href="#manolo">Manolo Edge</a>
         </div>
 
-        <iframe style="float: right;" src="https://ghbtns.com/github-btn.html?user=twbs&repo=bootstrap&type=star&count=true&size=large"
+        <iframe style="float: right;"
+                src="https://ghbtns.com/github-btn.html?user=twbs&repo=bootstrap&type=star&count=true&size=large"
                 frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe>
         <div style="clear: both;"></div>
     </div>
 </footer>
+
+<script src="https://unpkg.com/ionicons@5.0.0/dist/ionicons.js"></script>
 
 </body>
 </html>
