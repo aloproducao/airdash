@@ -1,8 +1,8 @@
 <div align="center">
-  <img width="400" alt="Promo" src="Large Promo.png">
+  <img width="500" alt="Promo" src="Large Promo.png">
   
-  <p class="body">Send picture from android to mac? Large file over 2gb from pc to pc? AirDash handles it all
-        securely and free.</p>
+  <p class="body">Send picture from android to mac? Large file over 2gb from pc to pc?</p>
+  <p>AirDash handles it all securely and free.</p>
         
   <img width="400" alt="Promo" src="promo.png">
 
