@@ -24,7 +24,7 @@ let showAddButton = true;
 const deviceStatuses = {}
 
 function createDeviceStatus(color, message) {
-  return { color, message };
+  return { color, message }
 }
 
 function setDeviceReady(id) {
