@@ -27,16 +27,20 @@ function createDeviceStatus(color, message) {
   return { color, message }
 }
 
+function setDeviceStatus(id, color, message) {
+  deviceStatuses[id] = createDeviceStatus(color, message)
+}
+
 function setDeviceReady(id) {
-  deviceStatuses[id] = createDeviceStatus(primaryColor, 'Ready')
+  setDeviceStatus(id, primaryColor, 'Ready')
 }
 
 function setDeviceError(id) {
-  deviceStatuses[id] = createDeviceStatus(errorColor, 'Could not connect')
+  setDeviceStatus(id, errorColor, 'Could not connect')
 }
 
 function setDeviceConnecting(id) {
-  deviceStatuses[id] = createDeviceStatus(warnColor, 'Connecting')
+  setDeviceStatus(id, warnColor, 'Connecting')
 }
 
 async function connectToDevices() {
