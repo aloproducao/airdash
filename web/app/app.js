@@ -4,9 +4,12 @@ import { parseFormData } from './bodyParser.js'
 console.log('Loading app.js')
 
 const primaryColor = '#25AE88'
+const warnColor = '#f1c40f'
+const errorColor = '#e74c3c'
+
 let showAddButton = true;
 
-;(async function () {
+; (async function () {
   try {
     await navigator.serviceWorker.register('./sw.js')
     navigator.serviceWorker.addEventListener('message', swMessageReceived);
@@ -20,19 +23,33 @@ let showAddButton = true;
 
 const deviceStatuses = {}
 
+function createDeviceStatus(color, message) {
+  return { color, message };
+}
+
+function setDeviceReady(id) {
+  deviceStatuses[id] = createDeviceStatus(primaryColor, 'Ready')
+}
+
+function setDeviceError(id) {
+  deviceStatuses[id] = createDeviceStatus(errorColor, 'Could not connect')
+}
+
+function setDeviceConnecting(id) {
+  deviceStatuses[id] = createDeviceStatus(warnColor, 'Connecting')
+}
+
 async function connectToDevices() {
   const devices = getDevices()
   for (const [id, device] of Object.entries(devices)) {
-    deviceStatuses[id] = { color: '#f1c40f', message: 'Connecting'}
+    setDeviceConnecting(id)
+
     render()
-    tryConnection(id).then(() => {
-      deviceStatuses[id] = { color: primaryColor, message: 'Ready'}
-    }).catch(err => {
-      console.error(err)
-      deviceStatuses[id] = { color: '#e74c3c', message: 'Could not connect'}
-    }).then(() => {
-      render()
-    })
+
+    tryConnection(id)
+      .then(() => setDeviceReady(id))
+      .catch(() => setDeviceError(id))
+      .then(() => render())
   }
 }
 
@@ -162,7 +179,7 @@ function attachDocument() {
         render()
         codeInputElement().focus()
       })
-   }
+  }
 
   document
     .querySelectorAll('.remove-device-btn')
@@ -198,15 +215,15 @@ function attachDocument() {
     });
 }
 
-async function tryAddingDevice(code, element) {
-  console.log(code)
+async function tryAddingDevice(id, element) {
+  console.log(id)
   element.disabled = true
   setStatus('Connecting...')
   try {
-    const result = await tryConnection(code)
-    addDevice(code, result.deviceName || code)
-    deviceStatuses[code] = {color: primaryColor, message: 'Ready'}
-    setActiveDevice(code)
+    const result = await tryConnection(id)
+    addDevice(id, result.deviceName || id)
+    setDeviceReady(id)
+    setActiveDevice(id)
     showAddButton = true
     render()
   } catch (error) {
