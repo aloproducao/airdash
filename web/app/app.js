@@ -1,5 +1,6 @@
 import { tryConnection, sendPayload } from './connection.js'
 import { parseFormData } from './bodyParser.js'
+import { Device } from './device.js'
 
 console.log('Loading app.js')
 
@@ -21,39 +22,20 @@ let showAddButton = true;
   await connectToDevices()
 })()
 
-const deviceStatuses = {}
-
-function createDeviceStatus(color, message) {
-  return { color, message }
-}
-
-function setDeviceStatus(id, color, message) {
-  deviceStatuses[id] = createDeviceStatus(color, message)
-}
-
-function setDeviceReady(id) {
-  setDeviceStatus(id, primaryColor, 'Ready')
-}
-
-function setDeviceError(id) {
-  setDeviceStatus(id, errorColor, 'Could not connect')
-}
-
-function setDeviceConnecting(id) {
-  setDeviceStatus(id, warnColor, 'Connecting')
-}
-
 async function connectToDevices() {
   const devices = getDevices()
-  for (const [id, device] of Object.entries(devices)) {
-    setDeviceConnecting(id)
+  for (const device of Object.values(devices)) {
+    device.setConnecting();
 
     render()
 
-    tryConnection(id)
-      .then(() => setDeviceReady(id))
-      .catch(() => setDeviceError(id))
-      .then(() => render())
+    tryConnection(device.id)
+      .then(() => device.setReady())
+      .catch(() => device.setError())
+      .then(() => {
+        console.log('render');
+        render()
+      })
   }
 }
 
@@ -75,13 +57,16 @@ async function swMessageReceived(event) {
 function render() {
   let activeDevice = getActiveDevice()
   const devices = getDevices()
+
   if (!devices[activeDevice]) {
     activeDevice = Object.keys(devices)[0]
   }
+
   const deviceRows = Object
     .entries(devices)
-    .map(([id, obj]) => renderDeviceRow(id, obj, id === activeDevice))
+    .map(([id, device]) => renderDeviceRow(id, device, id === activeDevice))
     .join('')
+
   const content = `
     <section>
         <form>${deviceRows}</form>
@@ -113,7 +98,11 @@ function renderAddDevice() {
 }
 
 function renderDeviceRow(code, device, checked) {
-  const status = deviceStatuses[code] || {}
+  const statusMessage = device.getStatusMessage()
+  const statusColor = device.getStatusColor()
+
+  console.log('render device row', statusMessage, statusColor, device);
+
   return `
     <div class="device" style="background: none; cursor: pointer;">
         <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" style="padding-right: 15px;">
@@ -122,8 +111,8 @@ function renderDeviceRow(code, device, checked) {
         <div style="display: inline-block; padding: 10px; vertical-align: middle;">
             <div style="font-size: 18px">${device.name}</div>
             <div style="font-size: 14px; color: #555;">
-                <span class="device-status-indicator" style="border-radius: 10px; width: 10px; height: 10px; background: ${status.color || '#e74c3c'}; margin-right: 5px; display: inline-block"></span> 
-                <span class="device-status">${status.message || 'Unknown error'}</span> -
+                <span class="device-status-indicator" style="border-radius: 10px; width: 10px; height: 10px; background: ${statusColor}; margin-right: 5px; display: inline-block"></span> 
+                <span class="device-status">${statusMessage || 'Unknown error'}</span> -
                 <span class="device-status">${code}</span>
             </div>
         </div>
@@ -225,8 +214,8 @@ async function tryAddingDevice(id, element) {
   setStatus('Connecting...')
   try {
     const result = await tryConnection(id)
-    addDevice(id, result.deviceName || id)
-    setDeviceReady(id)
+    let newDevice = addDevice(id, result.deviceName || id)
+    newDevice.setReady()
     setActiveDevice(id)
     showAddButton = true
     render()
@@ -238,14 +227,26 @@ async function tryAddingDevice(id, element) {
 }
 
 function getDevices() {
-  return JSON.parse(localStorage.getItem('devices') || '{}')
+  let devices =
+    Object.entries(localStorage)
+      .filter(([key, value]) => key.startsWith('DEVICE_'))
+      .map(([key, device]) => JSON.parse(device))
+
+  console.log('getDevices', devices)
+  const mappedDevices = {}
+
+  Object.keys(devices).forEach(id => {
+    const device = devices[id]
+    mappedDevices[device.id] = new Device(device.id, device.name, device.addedAt, device.status)
+  })
+
+  return mappedDevices
 }
 
 function addDevice(code, name) {
-  const newDevice = { name, addedAt: new Date() }
-  const devices = getDevices()
-  devices[code] = newDevice
-  localStorage.setItem('devices', JSON.stringify(devices))
+  const newDevice = new Device(code, name)
+  localStorage.setItem('DEVICE_' + code, JSON.stringify(newDevice))
+  return newDevice;
 }
 
 function setActiveDevice(code) {
