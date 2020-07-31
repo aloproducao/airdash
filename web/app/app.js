@@ -32,10 +32,7 @@ async function connectToDevices() {
     tryConnection(device.id)
       .then(() => device.setReady())
       .catch(() => device.setError())
-      .then(() => {
-        console.log('render');
-        render()
-      })
+      .then(() => render())
   }
 }
 
@@ -232,9 +229,7 @@ function getDevices() {
       .filter(([key, value]) => key.startsWith('DEVICE_'))
       .map(([key, device]) => JSON.parse(device))
 
-  console.log('getDevices', devices)
   const mappedDevices = {}
-
   Object.keys(devices).forEach(id => {
     const device = devices[id]
     mappedDevices[device.id] = new Device(device.id, device.name, device.addedAt, device.status)
