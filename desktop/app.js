@@ -1,6 +1,4 @@
 const { clipboard, nativeImage, ipcRenderer, remote } = require('electron')
-const app = remote.app
-
 const { getConnectionCode, startReceivingService } = require('./connection')
 const { setStatus } = require('./render')
 const {
@@ -9,6 +7,7 @@ const {
 } = require('./notifications')
 
 const primaryColor = '#25AE88'
+const app = remote.app
 
 if (require('electron-is-dev')) {
   document.querySelector('#app-name').textContent = 'AirDash Dev'
@@ -16,7 +15,6 @@ if (require('electron-is-dev')) {
 
 document.querySelector('#location').value = locationFolder()
 document.querySelector('#connection-id').textContent = getConnectionCode()
-
 document.querySelector('#select-location').onclick = async () => {
   const { dialog } = require('electron').remote
   const result = await dialog.showOpenDialog({
