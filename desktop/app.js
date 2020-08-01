@@ -2,6 +2,7 @@ const { clipboard, nativeImage, ipcRenderer, remote } = require('electron')
 const app = remote.app
 
 const { getConnectionCode, startReceivingService } = require('./connection')
+const { setStatus } = require('./render')
 const {
   notifyFileSaved,
   notifyCopy,
@@ -99,13 +100,6 @@ function isImage(filename) {
 function locationFolder() {
   const desktopPath = app.getPath('desktop')
   return localStorage.getItem('location') || desktopPath
-}
-
-function setStatus(color, status) {
-  let $message = document.querySelector('#status-message')
-  let $indicator = document.querySelector('#status-indicator')
-  $indicator.style.background = color
-  $message.textContent = status
 }
 
 
