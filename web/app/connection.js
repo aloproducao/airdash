@@ -71,7 +71,7 @@ export async function sendPayload(payload, meta, activeDevice, setStatus) {
       } else if (type === 'done') {
         if (batchSize * batch >= totalSize) {
           setStatus('Sent ' + meta)
-          ga('fileSent', 'event');
+          gtag('fileSent', 'event');
           resolve('done')
         } else {
           setStatus(`Sending ${batch + 1}/${Math.ceil(totalSize / batchSize)} MB...`)

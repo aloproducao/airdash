@@ -1,5 +1,11 @@
-const { clipboard, nativeImage, ipcRenderer } = require('electron')
+const { clipboard, nativeImage, ipcRenderer, remote } = require('electron')
+const app = remote.app
+
 const { getConnectionCode, startReceivingService } = require('./connection')
+const {
+  notifyFileSaved,
+  notifyCopy,
+} = require('./notifications')
 
 const primaryColor = '#25AE88'
 
@@ -23,8 +29,7 @@ document.querySelector('#select-location').onclick = async () => {
 }
 
 // I add this "configs" here for now until some kind of user settings is in place
-// Set to true to copy files to clipboard
-const COPY_FILE = true
+const COPY_FILE_IS_ENABLED = true
 
 ipcRenderer.on('after-show', (event, message) => {
   startReceivingService(dataReceived, setStatus);
@@ -78,7 +83,7 @@ function fileReceivedSuccessfully(filepath, filename) {
   setStatus(primaryColor, 'File received')
 
   // If enabled and is an image, write image to clipboard
-  if (COPY_FILE && isImage(filename)) {
+  if (COPY_FILE_IS_ENABLED && isImage(filename)) {
     clipboard.writeImage(
       nativeImage.createFromPath(filepath)
     )
@@ -87,44 +92,12 @@ function fileReceivedSuccessfully(filepath, filename) {
   notifyFileSaved(filename, filepath)
 }
 
-function notify(title, body, icon, opts = {}, cb) {
-  const notifOptions = {
-    body,
-    icon,
-    silent: true,
-    ...opts,
-  }
-
-  const myNotification = new Notification(title, notifOptions)
-  myNotification.onclick = () => {
-    // we can do something when user click file,
-    // for example open the directory, or preview the file
-  }
-}
-
-
-function notifyCopy(data) {
-  const title = `Received text`
-  const body = data
-  const image = `${__dirname}/trayIconTemplate@2x.png`
-  notify(title, body, image)
-}
-
-function notifyFileSaved(filename, filepath) {
-  const title = `New File`
-  const body = `A new file has been saved, ${filename}`
-  const image = `${__dirname}/trayIconTemplate@2x.png`
-  notify(title, body, isImage(filename) ? filepath : image)
-}
-
 function isImage(filename) {
   return /jpg|png|jpeg|svg|gif|/.test(filename)
 }
 
 function locationFolder() {
-  const path = require('path')
-  const os = require('os')
-  const desktopPath = path.join(os.homedir(), 'Desktop')
+  const desktopPath = app.getPath('desktop')
   return localStorage.getItem('location') || desktopPath
 }
 
