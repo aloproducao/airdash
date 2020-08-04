@@ -18,7 +18,7 @@ console.log('Loading app.js')
 
 let showAddButton = true;
 
-; (async function () {
+;(async function () {
   try {
     await navigator.serviceWorker.register('./sw.js')
     navigator.serviceWorker.addEventListener('message', swMessageReceived);
