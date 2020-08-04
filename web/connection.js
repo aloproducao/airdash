@@ -12,7 +12,6 @@ export async function tryConnection(deviceCode) {
     const conn = peer.connect(connectionId)
     conn.on('open', async function () {
       conn.on('data', (data) => {
-        console.log('data', data)
         const versionCheck = checkVersionCode(data.versionCode)
         if (versionCheck.mismatch) {
           return reject(versionCheck)
