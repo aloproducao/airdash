@@ -231,22 +231,22 @@
       }
 
       btnElem.onclick = () => {
-        gtag('downloadClicked', 'event');
+        gtag('event', 'downloadClicked');
         if (isMac) {
           window.location.href = '/airdash.dmg'
-          gtag('downloadClickedMac', 'event');
+          gtag('event', 'downloadClickedMac');
         } else if (isWindows) {
           window.location.href = '/airdash-win32.zip'
-          gtag('downloadClickedWindows', 'event');
+          gtag('event', 'downloadClickedWindows');
         } else {
           displayInstallPrompt()
-          gtag('downloadClickedOther', 'event');
+          gtag('event', 'downloadClickedOther');
         }
       }
     }
 
     updateDownloadButtons()
-    gtag('homeLoaded', 'event');
+    gtag('event', 'homeLoaded');
   })()
 
   let deferredPrompt
@@ -255,7 +255,7 @@
   })
 
   async function displayInstallPrompt() {
-    gtag('displayInstallPrompt', 'event');
+    gtag('event', 'displayInstallPrompt');
 
     console.log('Display install prompt')
     deferredPrompt.prompt()
@@ -263,7 +263,7 @@
     console.log(choice, deferredPrompt)
     if (choice.outcome === 'accepted') {
       window.location.href = '/app'
-      gtag('appInstalled', 'event');
+      gtag('event', 'appInstalled');
     }
   }
 </script>
