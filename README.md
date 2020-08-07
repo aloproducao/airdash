@@ -26,6 +26,8 @@
 - `npm run start-web` For web app
 - `npm start` For desktop app
 
+> Check out the [usage guide](https://github.com/simonbengtsson/airdash/blob/master/docs/Usage.md) to get started
+
 ## Architecture
 
 AirDash is built with [PeerJS](https://peerjs.com) which sends files through WebRTC. 
